@@ -62,8 +62,11 @@ ENV PATH="/opt/conda/bin:/root/.local/bin:${FCCLASSES3}/bin:$PATH"
 
 # Install capability package + git deps (see pyproject.docker).
 WORKDIR /build/molecular_qm_fcctools
+# molecular_qm_util imports pymatgen at install time. Pip, not conda:
+# conda-forge pymatgen pulls a large X11/matplotlib stack.
+RUN uv pip install --system pymatgen "setuptools>=80.9.0"
 RUN cp pyproject.docker pyproject.toml \
- && uv pip install --system . "setuptools>=80.9.0" \
+ && uv pip install --system . \
  && python -c "import simstack, molecular_qm_models, molecular_qm_util, molecular_qm_fcctools; \
 print('simstack', simstack.__file__); \
 print('models', molecular_qm_models.__file__); \
