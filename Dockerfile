@@ -32,6 +32,7 @@ WORKDIR /app
 RUN micromamba install -y -n base -c conda-forge \
     python=3.12.12 \
     numpy \
+    openbabel \
     && micromamba clean --all --yes
 
 # Capability tree (includes vendored FCclasses tarball).
