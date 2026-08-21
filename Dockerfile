@@ -1,11 +1,12 @@
 # Build from this capability repository:
-#   docker build -t molecular-qm-fcctools:latest .
+#   docker build --build-arg UV_GIT_SHAS=$(python resolve_uv_git_shas.py pyproject.docker) -t molecular-qm-fcctools:latest .
 # From simstack-model:
-#   docker build -t molecular-qm-fcctools:latest -f molecular_qm_fcctools/Dockerfile molecular_qm_fcctools
+#   docker build --build-arg UV_GIT_SHAS=$(python scripts/resolve_uv_git_shas.py molecular_qm_fcctools/pyproject.docker) -t molecular-qm-fcctools:latest -f molecular_qm_fcctools/Dockerfile molecular_qm_fcctools
+# Do not pass SIMSTACK_SHA: the Dockerfile cache key is UV_GIT_SHAS.
 #
 # Dual-use: capability tree is not installable on host (no pyproject.toml).
 # In the image, pyproject.docker is renamed and the package is pip-installed;
-# models / util / simstack come from git (see pyproject.docker).
+# models / util (`develop-ww`) / simstack come from git (see pyproject.docker).
 FROM mambaorg/micromamba:latest
 
 USER root
@@ -65,7 +66,12 @@ WORKDIR /build/molecular_qm_fcctools
 # molecular_qm_util imports pymatgen at install time. Pip, not conda:
 # conda-forge pymatgen pulls a large X11/matplotlib stack.
 RUN uv pip install --system pymatgen "setuptools>=80.9.0"
-RUN cp pyproject.docker pyproject.toml \
+# uv pip install . uses pyproject.docker. UV_GIT_SHAS is only a cache key:
+# resolved commits of those git sources, so this layer rebuilds when a pinned
+# branch (e.g. fix-git-pull) moves.
+ARG UV_GIT_SHAS=unknown
+RUN echo "uv git sources ${UV_GIT_SHAS}" \
+ && cp pyproject.docker pyproject.toml \
  && uv pip install --system . \
  && python -c "import simstack, molecular_qm_models, molecular_qm_util, molecular_qm_fcctools; \
 print('simstack', simstack.__file__); \
