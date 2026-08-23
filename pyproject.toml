@@ -1,10 +1,6 @@
-# Container-only install manifest.
-# Host: pyproject.toml is the Hatch package (Python nodes/models only; no Fortran).
-# Image: Dockerfile copies this to pyproject.toml, then `uv pip install .`.
-# FCclasses3 / fcc_tools binaries are built in the Dockerfile with gfortran.
 [project]
 name = "molecular_qm_fcctools"
-version = "0.1.0"
+dynamic = ["version"]
 description = "fcc_tools (FCclasses input generation / post-processing) for molecular quantum mechanics within the Simstack framework"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -23,8 +19,16 @@ dependencies = [
 molecular_qm_fcctools = "molecular_qm_fcctools"
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+fallback-version = "0.1.0.dev0"
+
+[tool.hatch.version.raw-options]
+version_scheme = "release-branch-semver"
+local_scheme = "no-local-version"
 
 [tool.hatch.metadata]
 allow-direct-references = true
@@ -40,3 +44,20 @@ override-dependencies = [
     "molecular_qm_util @ git+https://github.com/simstack/molecular_qm_util.git@develop-ww",
     "simstack @ git+https://github.com/simstack/simstack.git@fix-git-pull",
 ]
+
+# hatch-vcs reads git tags; python-semantic-release creates them from conventional commits.
+[tool.semantic_release]
+allow_zero_version = true
+major_on_zero = false
+tag_format = "v{version}"
+commit_parser = "conventional"
+
+[tool.semantic_release.branches.main]
+match = "(main|master)"
+prerelease = false
+
+[tool.semantic_release.changelog]
+mode = "update"
+
+[tool.semantic_release.remote]
+type = "github"

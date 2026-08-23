@@ -4,9 +4,8 @@
 #   docker build --build-arg UV_GIT_SHAS=$(python scripts/resolve_uv_git_shas.py molecular_qm_fcctools/pyproject.docker) -t molecular-qm-fcctools:latest -f molecular_qm_fcctools/Dockerfile molecular_qm_fcctools
 # Do not pass SIMSTACK_SHA: the Dockerfile cache key is UV_GIT_SHAS.
 #
-# Dual-use: capability tree is not installable on host (no pyproject.toml).
-# In the image, pyproject.docker is renamed and the package is pip-installed;
-# models / util (`develop-ww`) / simstack come from git (see pyproject.docker).
+# Host pyproject.toml is Hatch-only (no Fortran). This image compiles FCclasses3
+# with gfortran, then installs the Python package from pyproject.docker.
 FROM mambaorg/micromamba:latest
 
 USER root
