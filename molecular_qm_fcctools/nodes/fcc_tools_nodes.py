@@ -1,10 +1,7 @@
 """fcc_tools nodes: gen_fcc_state / gen_fcc_dipfile / reconvolute_* / convolute_RR."""
 
-from __future__ import annotations
-
 import logging
 from pathlib import Path
-from typing import Optional
 
 from molecular_qm_fcctools.lib.file_utils import (
     collect_outputs,
@@ -36,17 +33,19 @@ def _cleanup(path: Path | None) -> None:
 @node
 async def gen_fcc_state(
     file_stack: FileStack,
-    options: Optional[GenFccStateInput] = None,
+    options: GenFccStateInput,
     **kwargs,
 ) -> SimstackResult:
     """
     Run ``gen_fcc_state`` to build an FCclasses state file from a QM output.
 
     Returns:
-        SimstackResult with ``file_stack`` pointing at the generated ``.fcc`` state file.
+        SimstackResult: Generated state file.
+
+    SimstackResult:
+        file_stack (FileStack): The generated ``.fcc`` state file.
     """
     node_runner = kwargs["node_runner"]
-    options = options or GenFccStateInput()
     cleanup: Path | None = None
 
     try:
@@ -74,18 +73,20 @@ async def gen_fcc_state(
 @node
 async def gen_fcc_dipfile(
     file_stack: FileStack,
-    options: Optional[GenFccDipfileInput] = None,
+    options: GenFccDipfileInput,
     **kwargs,
 ) -> SimstackResult:
     """
     Run ``gen_fcc_dipfile`` to build ELDIP (and optionally MAGDIP/NAC) files.
 
     Returns:
-        SimstackResult with ``file_stack`` for the primary eldip file and
-        ``files`` for any additional MagDip/NAC outputs.
+        SimstackResult: Generated dipole files.
+
+    SimstackResult:
+        file_stack (FileStack): The primary ELDIP file.
+        files (List[FileStack]): Additional MagDip/NAC outputs when present.
     """
     node_runner = kwargs["node_runner"]
-    options = options or GenFccDipfileInput()
     cleanup: Path | None = None
 
     try:
@@ -126,30 +127,35 @@ async def gen_fcc_dipfile(
 @node
 async def reconvolute_td(
     corr_file: FileStack,
-    options: Optional[ReconvoluteTDInput] = None,
-    fcc_out: Optional[FileStack] = None,
+    options: ReconvoluteTDInput,
     **kwargs,
 ) -> SimstackResult:
     """
     Run ``reconvolute_TD`` to regenerate a TD spectrum with a new broadening.
 
     ``corr_file`` should be the TD correlation function (typically ``corr.dat``).
-    Optionally pass ``fcc_out`` so the tool can recover the energy shift.
+    Set ``options.fcc_out_file`` so the tool can recover the energy shift.
+
+    Returns:
+        SimstackResult: Regenerated TD spectrum files.
+
+    SimstackResult:
+        file_stack (FileStack): First recognized spectrum file.
+        files (List[FileStack]): All recognized spectrum files.
     """
     node_runner = kwargs["node_runner"]
-    options = options or ReconvoluteTDInput()
     cleanups: list[Path | None] = []
 
     try:
         corr_path, cleanup = materialize_file_stack(
-            corr_file, preferred_name=options.corr_file or "corr.dat"
+            corr_file, preferred_name=options.corr_file
         )
         cleanups.append(cleanup)
         options.corr_file = corr_path.name
 
-        if fcc_out is not None:
+        if options.fcc_out_file is not None:
             fcc_path, cleanup = materialize_file_stack(
-                fcc_out, preferred_name=options.fcc_out or "fcc.out"
+                options.fcc_out_file, preferred_name=options.fcc_out
             )
             cleanups.append(cleanup)
             options.fcc_out = fcc_path.name
@@ -163,7 +169,6 @@ async def reconvolute_td(
         if not ok:
             return node_runner.fail("reconvolute_TD failed")
 
-        # Upstream writes spectrum data files; collect common TD names if present.
         candidates = [
             "spec_Int_TD.dat",
             "spec_LS_TD.dat",
@@ -188,21 +193,27 @@ async def reconvolute_td(
 @node
 async def reconvolute_ti(
     spectrum_file: FileStack,
-    options: Optional[ReconvoluteTIInput] = None,
+    options: ReconvoluteTIInput,
     **kwargs,
 ) -> SimstackResult:
     """
     Run ``reconvolute_TI`` to regenerate a TI spectrum with a new broadening.
 
     ``spectrum_file`` is typically ``Bin_Spectrum.dat`` from an FCclasses3 TI run.
+
+    Returns:
+        SimstackResult: Regenerated TI spectrum files.
+
+    SimstackResult:
+        file_stack (FileStack): First recognized spectrum file.
+        files (List[FileStack]): All recognized spectrum files.
     """
     node_runner = kwargs["node_runner"]
-    options = options or ReconvoluteTIInput()
     cleanup: Path | None = None
 
     try:
         spec_path, cleanup = materialize_file_stack(
-            spectrum_file, preferred_name=options.spectrum_file or "Bin_Spectrum.dat"
+            spectrum_file, preferred_name=options.spectrum_file
         )
         options.spectrum_file = spec_path.name
 
@@ -223,7 +234,6 @@ async def reconvolute_ti(
             "Bin_Spectrum.dat",
         ]
         found = [name for name in candidates if Path(name).exists()]
-        # Always include the input if nothing else appeared (tool may overwrite in place).
         if not found:
             found = [spec_path.name]
 
@@ -240,7 +250,7 @@ async def reconvolute_ti(
 @node
 async def convolute_rr(
     spectrum_file: FileStack,
-    options: Optional[ConvoluteRRInput] = None,
+    options: ConvoluteRRInput,
     **kwargs,
 ) -> SimstackResult:
     """
@@ -248,9 +258,15 @@ async def convolute_rr(
 
     For ``1D`` the default input is ``RR_Spectrum_VertE.dat``;
     for ``2D`` it is ``RR_Spectrum_2D.dat``.
+
+    Returns:
+        SimstackResult: Convoluted RR spectrum files.
+
+    SimstackResult:
+        file_stack (FileStack): First recognized output file.
+        files (List[FileStack]): All recognized output files.
     """
     node_runner = kwargs["node_runner"]
-    options = options or ConvoluteRRInput()
     cleanup: Path | None = None
 
     try:

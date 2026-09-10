@@ -1,7 +1,5 @@
 """FCclasses3 spectrum calculation node."""
 
-from __future__ import annotations
-
 import logging
 from pathlib import Path
 
@@ -26,8 +24,14 @@ async def fcclasses3(fc_classes_input: FCClassesInput, **kwargs) -> SimstackResu
     state1, state2, and ELDIP.
 
     Returns:
-        SimstackResult with TD/TI spectrum ArrayStorage attributes when present,
-        plus collected output FileStacks on ``files``.
+        SimstackResult: TD/TI spectrum arrays and output files.
+
+    SimstackResult:
+        int_td_spectrum (ArrayStorage): Intensity TD spectrum when METHOD is TD.
+        ls_td_spectrum (ArrayStorage): Line-shape TD spectrum when METHOD is TD.
+        int_ti_spectrum (ArrayStorage): Intensity TI spectrum when METHOD is TI.
+        ls_ti_spectrum (ArrayStorage): Line-shape TI spectrum when METHOD is TI.
+        files (List[FileStack]): Renamed spectrum data files.
     """
     node_runner = kwargs["node_runner"]
     local_paths: list[Path] = []

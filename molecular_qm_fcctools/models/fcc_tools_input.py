@@ -5,10 +5,11 @@ from __future__ import annotations
 from enum import Enum
 from typing import Optional
 
-from odmantic import Model
+from odmantic import Field, Model
 from pydantic import model_validator
 
 from simstack.models import simstack_model
+from simstack.models.files import FileStack
 from simstack.util.ui_tools import ui_hide_fields
 
 
@@ -189,6 +190,7 @@ class ReconvoluteTDInput(Model):
     property: Optional[FccProperty] = None
     energy_shift: Optional[float] = None
     fcc_out: Optional[str] = "fcc.out"
+    fcc_out_file: Optional[FileStack] = Field(None)
 
     @model_validator(mode="before")
     @classmethod
