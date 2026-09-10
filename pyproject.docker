@@ -31,12 +31,12 @@ allow-direct-references = true
 
 [tool.uv.sources]
 molecular_qm_models = { git = "https://github.com/simstack/molecular_qm_models.git" }
-molecular_qm_util = { git = "https://github.com/simstack/molecular_qm_util.git", rev = "develop-ww" }
-simstack = { git = "https://github.com/simstack/simstack.git", rev = "fix-git-pull" }
+molecular_qm_util = { git = "https://github.com/simstack/molecular_qm_util.git" }
+simstack = { git = "https://github.com/simstack/simstack.git", rev = "ww/new-features" }
 
 [tool.uv]
 override-dependencies = [
     "molecular_qm_models @ git+https://github.com/simstack/molecular_qm_models.git",
-    "molecular_qm_util @ git+https://github.com/simstack/molecular_qm_util.git@develop-ww",
-    "simstack @ git+https://github.com/simstack/simstack.git@fix-git-pull",
+    "molecular_qm_util @ git+https://github.com/simstack/molecular_qm_util.git",
+    "simstack @ git+https://github.com/simstack/simstack.git@ww/new-features",
 ]
