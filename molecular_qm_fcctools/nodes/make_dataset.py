@@ -5,7 +5,7 @@ import numpy as np
 
 from molecular_qm_util import compute_iupac_name, smiles_to_molecule
 
-from spectra.spectra_analysis import process_experimental_spectrum
+from molecular_qm_fcctools.nodes.spectra_analysis import process_experimental_spectrum
 from simstack.core.context import context
 from simstack.core.node import node
 from simstack.core.node_runner import NodeRunner
