@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.6.0 (2026-09-13)
+
+### Features
+
+- Update imports and expose new spectra processing and plotting nodes in module init
+  ([`c3663c7`](https://github.com/simstack/molecular_qm_fcctools/commit/c3663c754c7601361d558f385d0b0503ff52618d))
+
+
 ## v0.5.0 (2026-09-13)
 
 
