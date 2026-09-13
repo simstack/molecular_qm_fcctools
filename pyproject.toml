@@ -47,6 +47,7 @@ override-dependencies = [
     "molecular_qm_util @ git+https://github.com/simstack/molecular_qm_util.git",
     "molecular_qm_gaussian @ git+https://github.com/simstack/molecular_qm_gaussian.git",
     "simstack @ git+https://github.com/simstack/simstack.git@ww/new-features",
+    "rdkit==2025.9.5"
 ]
 
 # hatch-vcs reads git tags; python-semantic-release creates them from conventional commits.
