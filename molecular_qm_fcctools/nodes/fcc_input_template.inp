@@ -1,0 +1,19 @@
+$$$
+PROPERTY     =   OPA  ; OPA/EMI/ECD/CPL/RR/TPA/TPCD/MCD/IC/NR0
+MODEL        =   VG   ; AS/ASF/AH/VG/VGF/VH
+DIPOLE       =   FC   ; FC/HTi/HTf
+TEMP         =   300.00 ; (temperature in K)
+BROADFUN     =   GAU  ; GAU/LOR/VOI
+HWHM         =   0.05 ; (broadening width in eV)
+METHOD       =   TD   ; TI/TD
+SPCMIN       =   1.0
+SPCMAX       =   7.0
+;VIBRATIONAL ANALYSIS
+NORMALMODES  =   COMPUTE   ; COMPUTE/READ/IMPLICIT
+COORDS       =   INTERNAL ; CARTESIAN/INTERNAL
+;RM_COORD     =   S1MODES
+;RM_COORD_INDS=
+;INPUT DATA FILES
+STATE1_FILE  =  {ground_state}
+STATE2_FILE  =  {excited_state}
+ELDIP_FILE   =  {transition_dipole}

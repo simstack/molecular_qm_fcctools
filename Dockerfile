@@ -64,7 +64,7 @@ ENV PATH="/opt/conda/bin:/root/.local/bin:${FCCLASSES3}/bin:$PATH"
 WORKDIR /build/molecular_qm_fcctools
 # molecular_qm_util imports pymatgen at install time. Pip, not conda:
 # conda-forge pymatgen pulls a large X11/matplotlib stack.
-RUN uv pip install --system pymatgen "setuptools>=80.9.0"
+#RUN uv pip install --system pymatgen "setuptools>=80.9.0"
 # uv pip install . uses pyproject.docker. UV_GIT_SHAS is only a cache key:
 # resolved commits of those git sources, so this layer rebuilds when a pinned
 # branch (e.g. fix-git-pull) moves.
