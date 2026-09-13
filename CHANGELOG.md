@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.4.0 (2026-09-13)
+
+### Features
+
+- Integrate molecular_qm_gaussian dependency and update imports for spectra nodes
+  ([`d76bdac`](https://github.com/simstack/molecular_qm_fcctools/commit/d76bdac9fb11bf0ee5cb1cb59486b25e5f88a17b))
+
+
 ## v0.3.0 (2026-09-13)
 
 ### Chores
