@@ -12,7 +12,7 @@ from simstack.core.artifacts import register_artifact_mapping, ArtifactArguments
 from simstack.core.context import context
 
 from molecular_qm_fcctools.nodes.fc_classes import FC_ClassesInput
-from spectra.plot_spectra import make_multi_line_chart
+from molecular_qm_fcctools.nodes.plot_spectra import make_multi_line_chart
 from spectra.spectra_analysis import process_experimental_spectrum
 from spectra.vibrational_spectra import vb_spectra
 from molecular_qm_models.basis_set import BasisSet, BasisSetEnum, BasisSetModel

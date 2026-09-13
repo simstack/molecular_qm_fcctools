@@ -16,7 +16,7 @@ from simstack.core.context import context
 from simstack.core.definitions import TaskStatus
 from simstack.core.node import node
 
-from spectra.fcc import fcc_dipole, fcc_make_plot, fcc_state
+from molecular_qm_fcctools.nodes.fcc import fcc_dipole, fcc_make_plot, fcc_state
 from molecular_qm_fcctools.nodes.fc_classes import FC_ClassesInput, fc_classes
 
 from simstack.models import Parameters, ArrayList, IntData, StringData, FloatData
