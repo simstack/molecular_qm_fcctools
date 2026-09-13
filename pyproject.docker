@@ -18,6 +18,7 @@ dependencies = [
     "molecular_qm_gaussian",
     "simstack",
     "numpy",
+    "scipy",
 ]
 
 [project.entry-points."simstack.modules"]
