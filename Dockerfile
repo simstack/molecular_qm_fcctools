@@ -72,7 +72,7 @@ ARG UV_GIT_SHAS=unknown
 RUN echo "uv git sources ${UV_GIT_SHAS}" \
  && cp pyproject.docker pyproject.toml \
  && uv pip install --system . \
- && python -c "import simstack, molecular_qm_models, molecular_qm_util, molecular_qm_fcctools, molecular_qm_gaussian \
+ && python -c "import simstack, molecular_qm_models, molecular_qm_util, molecular_qm_fcctools, molecular_qm_gaussian; \
 print('simstack', simstack.__file__); \
 print('models', molecular_qm_models.__file__); \
 print('fcctools', molecular_qm_fcctools.__file__); \
