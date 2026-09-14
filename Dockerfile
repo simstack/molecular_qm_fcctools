@@ -81,5 +81,5 @@ print('gaussian', molecular_qm_gaussian.__file__);     "
 WORKDIR /app
 # Host simstack bind-mounts the task workdir at /tmp/simstack (CONTAINER_WORKDIR).
 # Older in-image simstack still uses /root/simstack under --in-docker.
-RUN mkdir -p /tmp/simstack && ln -sfn /tmp/simstack /root/simstack
+#RUN mkdir -p /tmp/simstack && ln -sfn /tmp/simstack /root/simstack
 ENTRYPOINT ["python", "-m", "simstack.core.run_node"]
