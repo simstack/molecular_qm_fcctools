@@ -16,30 +16,15 @@ from simstack.core.context import context
 from simstack.core.definitions import TaskStatus
 from simstack.core.node import node
 
-from molecular_qm_fcctools.nodes.fcc import fcc_dipole, fcc_make_plot, fcc_state
 from molecular_qm_fcctools.nodes.fc_classes import FC_ClassesInput, fc_classes
 
-from simstack.models import Parameters, ArrayList, IntData, StringData, FloatData
+from simstack.models import Parameters, StringData, FloatData
 
 import logging
-
-from simstack.models.files import FileStack
-from simstack.models.file_list import FileListIO
 from simstack.models.parameters import SlurmParameters
 from simstack.models.charts_artifact import create_simple_line_chart
 
 logger = logging.getLogger("vb_spectra")
-
-slurm_parameters = SlurmParameters(
-    nodes=1,
-    tasks_per_node=12,
-    mem="10G",
-    time="12:00:00"
-)
-parameters = Parameters(resource="justus", queue="slurm-queue", recompute_artifacts=True)
-parameters.slurm_parameters = slurm_parameters
-parameters_here = Parameters(resource="justus", queue="default", recompute_artifacts=True)
-
 
 def fix_bounds(
     spc_min: float,
@@ -222,9 +207,7 @@ def _as_qm_result(gaussian_result):
     if isinstance(gaussian_result, SimstackResult):
         gaussian_result = gaussian_result.result
     if not isinstance(gaussian_result, QMResult):
-        raise TypeError(
-            f"gaussian returned {type(gaussian_result)}, expected QMResult"
-        )
+        raise TypeError(f"gaussian returned {type(gaussian_result)}, expected QMResult")
     return gaussian_result
 
 
@@ -274,9 +257,7 @@ async def vb_spectra(qm_input: QMInput, excited_state_functional_input: Function
         node_runner.custom_name = qm_input.molecule.formula
 
         node_runner.log(f"starting ground state optimization")
-        # gaussian_slurm_params = SlurmParameters(cpus_per_task=12, mem_per_cpu="10G", time="12:00:00")
-        # enforced_parameters = Parameters(resource="justus", queue="slurm-queue", recompute_artifacts=True,
-        #                               slurm_parameters=gaussian_slurm_params)
+        node_runner.info(f"starting gs optimization")
         input_data = qm_input.model_dump()
         del input_data['id']
         ground_state_input = QMInput(**input_data)
@@ -294,7 +275,7 @@ async def vb_spectra(qm_input: QMInput, excited_state_functional_input: Function
         optimized_geometry = Molecule.from_molecule(optimization_result.final_structure)
         ground_state_fcc_file = fcc_state(chk_file, IntData(value=0), **kwargs)
 
-        logger.info(f"task_id: {task_id} ground_state_fcc_file: {str(ground_state_fcc_file)}")
+        node_runner.info(f"ground_state_fcc_file: {str(ground_state_fcc_file)}")
 
         excited_state_input = QMInput(**input_data)
         excited_state_input.molecule = optimized_geometry

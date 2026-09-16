@@ -60,12 +60,14 @@ def fcc_state(file_stack: FileStack, state_number: IntData, **kwargs) -> Simstac
         SimstackResult: The result of the FCC state processing.
             file_stack (simstack.models.files.FileStack): The generated FCC state file.
     """
-    node_runner = NodeRunner(name="fcc_state", logger=logger, **kwargs)
-
+    node_runner = kwargs["node_runner"]
     state_number = state_number.value
     node_runner.custom_name = f"state{state_number}"
+    node_runner.info("ffc_state started for {state_number}")
+    local_file = file_stack.get()
 
-    local_file = file_stack.get(local_dir=Path("../../../spectra"))
+
+    node_runner.info("ffc_state downloaded to {local_file}")
 
     # Copy file to cwd if it's not already there (and not the same file)
     file_to_cleanup = _copy_to_cwd_if_needed(node_runner, local_file)
@@ -88,7 +90,6 @@ def fcc_state(file_stack: FileStack, state_number: IntData, **kwargs) -> Simstac
             file_to_cleanup.unlink()
             node_runner.info(f"Deleted local file: {file_to_cleanup}")
         return node_runner.fail("could not move output file")
-
     node_runner.file_stack = FileStack.from_local_file(f"gaussian.{state_number}.fcc", in_memory=False, is_hashable=True,
                                                        secure_source=True)
 
