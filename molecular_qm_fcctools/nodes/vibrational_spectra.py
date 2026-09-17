@@ -18,10 +18,9 @@ from simstack.core.node import node
 
 from molecular_qm_fcctools.nodes.fc_classes import FC_ClassesInput, fc_classes
 
-from simstack.models import Parameters, StringData, FloatData
+from simstack.models import StringData, FloatData
 
 import logging
-from simstack.models.parameters import SlurmParameters
 from simstack.models.charts_artifact import create_simple_line_chart
 
 logger = logging.getLogger("vb_spectra")
@@ -211,7 +210,7 @@ def _as_qm_result(gaussian_result):
     return gaussian_result
 
 
-@node(parameters=parameters)
+@node
 async def vb_spectra(qm_input: QMInput, excited_state_functional_input: FunctionalModel,
                      excited_state_basis_input: BasisSetModel,
                      protocol_name: StringData,
