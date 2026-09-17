@@ -2,6 +2,27 @@
 
 <!-- version list -->
 
+## v0.6.2 (2026-09-17)
+
+### Bug Fixes
+
+- Decorate vb_spectra with @node so the Docker image import check succeeds
+  ([`1a96578`](https://github.com/simstack/molecular_qm_fcctools/commit/1a96578bafbd998f66da760ad6d69dce5d06e84c))
+
+### Chores
+
+- Add rdkit dependency to pyproject.toml
+  ([`311312a`](https://github.com/simstack/molecular_qm_fcctools/commit/311312a8bab925b8f7da3245bb1b00631c7d1790))
+
+- Update simstack to version 2.1.0.dev214 in lockfile
+  ([`2b147c1`](https://github.com/simstack/molecular_qm_fcctools/commit/2b147c15bc91e71572363e61fb4b50a67f6aa88d))
+
+### Refactoring
+
+- Improve logging and streamline parameter handling in FCC and vibrational spectra nodes
+  ([`ca3b9f8`](https://github.com/simstack/molecular_qm_fcctools/commit/ca3b9f8b10c46dfc1204ec9d8f94d5374cdfd08a))
+
+
 ## v0.6.1 (2026-09-13)
 
 
