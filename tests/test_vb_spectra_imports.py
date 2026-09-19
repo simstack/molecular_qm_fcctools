@@ -4,7 +4,7 @@ A logging-only refactor dropped these names; Gaussian then succeeded and
 vb_spectra crashed with NameError on fcc_state / FileStack.
 """
 
-from inspect import getsource, signature
+from inspect import getsource
 
 from molecular_qm_fcctools.nodes import vibrational_spectra as vs
 
@@ -20,9 +20,8 @@ def test_vb_spectra_defines_nested_node_helpers():
         "fcc_state",
     ):
         assert hasattr(vs, name), name
-    assert "formchk_checkpoint" in getsource(vs._formatted_checkpoint)
-    params = list(signature(vs._formatted_checkpoint).parameters.keys())
-    assert params == ["qm_result", "kwargs"]
+    assert "formchk_checkpoint" not in getsource(vs)
+    assert "gaussian.fchk" in getsource(vs._gaussian_fchk)
 
 
 def test_fcc_helpers_reject_binary_chk():
