@@ -213,6 +213,25 @@ def _as_qm_result(gaussian_result):
     return gaussian_result
 
 
+async def _formatted_checkpoint(qm_result, task_id, **kwargs):
+    from molecular_qm_gaussian import formchk_checkpoint
+
+    fchk_file = qm_result.files.find(r"gaussian\.fchk$")
+    if fchk_file is not None:
+        return fchk_file
+    chk_file = qm_result.files.find(r"gaussian\.chk$")
+    if chk_file is None:
+        raise RuntimeError(f"task_id: {task_id} cannot find gaussian.fchk or gaussian.chk")
+    converted = await formchk_checkpoint(chk_file, **kwargs)
+    if isinstance(converted, SimstackResult):
+        if converted.status != TaskStatus.COMPLETED:
+            raise RuntimeError(
+                f"task_id: {task_id} formchk failed: {converted.error_message}"
+            )
+        converted = converted.file_stack
+    return converted
+
+
 @node
 async def vb_spectra(qm_input: QMInput, excited_state_functional_input: FunctionalModel,
                      excited_state_basis_input: BasisSetModel,
@@ -241,7 +260,7 @@ async def vb_spectra(qm_input: QMInput, excited_state_functional_input: Function
     SimstackResult:
         all_spectra (ArrayList): a list of spectra for each state.
 
-    Called Nodes: gaussian, fc_classes
+    Called Nodes: gaussian, formchk_checkpoint, fcc_state, fcc_dipole, fc_classes
     """
     node_runner = kwargs.get('node_runner', None)
     task_id = kwargs.get("task_id", None)
@@ -270,12 +289,9 @@ async def vb_spectra(qm_input: QMInput, excited_state_functional_input: Function
         if optimization_result.final_structure is None:
             raise ValueError("gaussian ground-state result has no final_structure")
 
-        chk_file = optimization_result.files.find("gaussian.chk")
-        if chk_file is None:
-            raise RuntimeError(f"task_id: {task_id} cannot find ground state .chk file")
-
         optimized_geometry = Molecule.from_molecule(optimization_result.final_structure)
-        ground_state_fcc_file = fcc_state(chk_file, IntData(value=0), **kwargs)
+        fchk_file = await _formatted_checkpoint(optimization_result, task_id, **kwargs)
+        ground_state_fcc_file = fcc_state(fchk_file, IntData(value=0), **kwargs)
 
         node_runner.info(f"ground_state_fcc_file: {str(ground_state_fcc_file)}")
 
@@ -324,14 +340,11 @@ async def vb_spectra(qm_input: QMInput, excited_state_functional_input: Function
             excited_state_gaussian_result = _as_qm_result(
                 await gaussian(excited_state_input, **gaussian_kwargs)
             )
-            chk_file = excited_state_gaussian_result.files.find("gaussian.chk")
-            if chk_file is None:
-                raise RuntimeError(
-                    f"task_id: {task_id} cannot find excited-state .chk file for focus state {focus_state}"
-                )
-
-            excited_state_fcc_file = fcc_state(chk_file, state_number, **kwargs)
-            excited_state_dipole_file = fcc_dipole(chk_file, state_number, **kwargs)
+            fchk_file = await _formatted_checkpoint(
+                excited_state_gaussian_result, task_id, **kwargs
+            )
+            excited_state_fcc_file = fcc_state(fchk_file, state_number, **kwargs)
+            excited_state_dipole_file = fcc_dipole(fchk_file, state_number, **kwargs)
 
             input_list = FileListIO()
             input_list.file_list.append(ground_state_fcc_file)

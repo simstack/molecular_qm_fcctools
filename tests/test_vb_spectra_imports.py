@@ -4,6 +4,8 @@ A logging-only refactor dropped these names; Gaussian then succeeded and
 vb_spectra crashed with NameError on fcc_state / FileStack.
 """
 
+from inspect import getsource
+
 from molecular_qm_fcctools.nodes import vibrational_spectra as vs
 
 
@@ -18,3 +20,11 @@ def test_vb_spectra_defines_nested_node_helpers():
         "fcc_state",
     ):
         assert hasattr(vs, name), name
+    assert "formchk_checkpoint" in getsource(vs._formatted_checkpoint)
+
+
+def test_fcc_helpers_reject_binary_chk():
+    from molecular_qm_fcctools.nodes import fcc
+
+    assert "formatted checkpoint (.fchk)" in getsource(fcc.fcc_state)
+    assert "formatted checkpoint (.fchk)" in getsource(fcc.fcc_dipole)

@@ -76,9 +76,16 @@ def fcc_state(file_stack: FileStack, state_number: IntData, **kwargs) -> Simstac
     file_stack_hash = complex_hash_function(file_stack)
     node_runner.info(f"FileStack hash: {file_stack_hash}")
 
+    input_name = Path(local_file.name)
+    if input_name.suffix.lower() == ".chk":
+        return node_runner.fail(
+            "gen_fcc_state requires a Gaussian formatted checkpoint (.fchk), "
+            f"not binary {input_name}"
+        )
+
     success = node_runner.subprocess(
         "gen_fcc_state",
-        ["gen_fcc_state", "-i", str(local_file.name), "-o", "gaussian.fcc"],
+        ["gen_fcc_state", "-i", str(input_name), "-o", "gaussian.fcc"],
     )
       
     if not success or not os.path.exists("gaussian.fcc"):
@@ -120,9 +127,16 @@ def fcc_dipole(file_stack: FileStack, state_number: IntData, **kwargs) -> Simsta
 
     node_runner.info(f"{file_stack.id} downloaded to {local_file} for state: {state_number}")
 
+    input_name = Path(local_file.name)
+    if input_name.suffix.lower() == ".chk":
+        return node_runner.fail(
+            "gen_fcc_dipfile requires a Gaussian formatted checkpoint (.fchk), "
+            f"not binary {input_name}"
+        )
+
     success = node_runner.subprocess(
         "gen_fcc_dipfile",
-        ["gen_fcc_dipfile", "-i", str(local_file.name), "-oe", "gaussian.eldip"],
+        ["gen_fcc_dipfile", "-i", str(input_name), "-oe", "gaussian.eldip"],
     )
 
     if not success or not os.path.exists("gaussian.eldip"):
