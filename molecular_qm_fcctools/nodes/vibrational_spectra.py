@@ -285,13 +285,17 @@ async def vb_spectra(qm_input: QMInput, excited_state_functional_input: Function
 
         node_runner.info(f"ground_state_fcc_file: {str(ground_state_fcc_file)}")
 
-        excited_state_input = QMInput(**input_data)
-        excited_state_input.molecule = optimized_geometry
-
-        excited_state_input.basis_set = excited_state_basis
-        excited_state_input.states = 20
-        excited_state_input.functional = excited_state_functional
-        excited_state_input.focus_state = 1
+        # QMInput zeros `states` whenever excited_states is False (including on
+        # later field assignment). Build the TD input in one constructor call.
+        excited_state_data = dict(input_data)
+        excited_state_data["molecule"] = optimized_geometry
+        excited_state_data["basis_set"] = excited_state_basis
+        excited_state_data["functional"] = excited_state_functional
+        excited_state_data["excited_states"] = True
+        excited_state_data["frequencies"] = False
+        excited_state_data["states"] = 20
+        excited_state_data["focus_state"] = 1
+        excited_state_input = QMInput(**excited_state_data)
 
         node_runner.log(f"starting excited state calculation for {excited_state_input.states} states")
         gaussian_kwargs["custom_name"] = "excited_state_scan." + qm_input.molecule.formula
@@ -317,13 +321,9 @@ async def vb_spectra(qm_input: QMInput, excited_state_functional_input: Function
         for focus_state in range(1, max_target_states):
             node_runner.log(f"starting excited state calculation for focus state {focus_state}")
 
-            excited_state_input = QMInput(**input_data)
-            excited_state_input.molecule = optimized_geometry
-
-            excited_state_input.basis_set = excited_state_basis
-            excited_state_input.states = focus_state + 2
-            excited_state_input.functional = excited_state_functional
-            excited_state_input.focus_state = focus_state
+            excited_state_data["states"] = focus_state + 2
+            excited_state_data["focus_state"] = focus_state
+            excited_state_input = QMInput(**excited_state_data)
 
             state_number = IntData(value=focus_state)
             gaussian_kwargs["custom_name"] = "excited_state_scan." + qm_input.molecule.formula + f".state_{focus_state}"
