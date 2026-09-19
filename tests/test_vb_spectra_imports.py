@@ -31,3 +31,7 @@ def test_fcc_helpers_reject_binary_chk():
     assert "formatted checkpoint (.fchk)" in getsource(fcc.fcc_dipole)
     assert "last_stdout" in getsource(fcc.fcc_state)
     assert "last_stdout" in getsource(fcc.fcc_dipole)
+    assert 'kwargs["node_runner"]' in getsource(fcc.fcc_make_plot)
+    assert 'kwargs["node_runner"]' in getsource(fcc.fcc_dipole)
+    assert "NodeRunner(" not in getsource(fcc.fcc_make_plot)
+    assert "NodeRunner(" not in getsource(fcc.fcc_dipole)

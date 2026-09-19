@@ -9,11 +9,7 @@ from simstack.core.node_runner import NodeRunner
 from simstack.models.array_storage import ArrayStorage
 from simstack.models.files import FileStack
 
-import logging
-
 from simstack.models import ArrayList, IntData
-
-logger = logging.getLogger("FCCNode")
 
 
 def _copy_to_cwd_if_needed(node_runner: NodeRunner, local_file: Path) -> Path | None:
@@ -121,7 +117,7 @@ def fcc_dipole(file_stack: FileStack, state_number: IntData, **kwargs) -> Simsta
         SimstackResult: The result of the FCC dipole processing.
             file_stack (simstack.models.files.FileStack): The generated FCC dipole file.
     """
-    node_runner = NodeRunner(name="fcc_dipole", logger=logger, **kwargs)
+    node_runner = kwargs["node_runner"]
     state_number = state_number.value
     node_runner.custom_name = f"state{state_number}"
 
@@ -190,7 +186,7 @@ def fcc_make_plot(spectra_list: ArrayList, **kwargs) -> SimstackResult:
         allspectra (ArrayStorage): An ArrayStorage object containing the aggregated spectrum data.
 
     """
-    node_runner = kwargs.get("node_runner", NodeRunner("fcc_make_plot",logger,**kwargs))
+    node_runner = kwargs["node_runner"]
     try:
         import numpy as np
         from scipy import interpolate
