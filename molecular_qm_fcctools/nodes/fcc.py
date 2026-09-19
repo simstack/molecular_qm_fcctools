@@ -63,11 +63,10 @@ def fcc_state(file_stack: FileStack, state_number: IntData, **kwargs) -> Simstac
     node_runner = kwargs["node_runner"]
     state_number = state_number.value
     node_runner.custom_name = f"state{state_number}"
-    node_runner.info("ffc_state started for {state_number}")
+    node_runner.info(f"fcc_state started for {state_number}")
     local_file = file_stack.get()
 
-
-    node_runner.info("ffc_state downloaded to {local_file}")
+    node_runner.info(f"fcc_state downloaded to {local_file}")
 
     # Copy file to cwd if it's not already there (and not the same file)
     file_to_cleanup = _copy_to_cwd_if_needed(node_runner, local_file)
@@ -76,13 +75,26 @@ def fcc_state(file_stack: FileStack, state_number: IntData, **kwargs) -> Simstac
     file_stack_hash = complex_hash_function(file_stack)
     node_runner.info(f"FileStack hash: {file_stack_hash}")
 
+    input_name = Path(local_file.name)
+    if input_name.suffix.lower() == ".chk":
+        return node_runner.fail(
+            "gen_fcc_state requires a Gaussian formatted checkpoint (.fchk), "
+            f"not binary {input_name}"
+        )
+
     success = node_runner.subprocess(
         "gen_fcc_state",
-        ["gen_fcc_state", "-i", str(local_file.name), "-o", "gaussian.fcc"],
+        ["gen_fcc_state", "-i", str(input_name), "-o", "gaussian.fcc"],
     )
       
     if not success or not os.path.exists("gaussian.fcc"):
-        return node_runner.fail("fcc_state failed or gaussian.fcc file not found")
+        details = "\n".join(
+            part for part in (node_runner.last_stdout, node_runner.last_stderr) if part
+        ).strip()
+        message = "fcc_state failed or gaussian.fcc file not found"
+        if details:
+            message = f"{message}\n{details}"
+        return node_runner.fail(message)
         
     if not node_runner.subprocess(f"mv_file.{state_number}.fcc",
                             f"mv gaussian.fcc gaussian.{state_number}.fcc"):
@@ -120,13 +132,26 @@ def fcc_dipole(file_stack: FileStack, state_number: IntData, **kwargs) -> Simsta
 
     node_runner.info(f"{file_stack.id} downloaded to {local_file} for state: {state_number}")
 
+    input_name = Path(local_file.name)
+    if input_name.suffix.lower() == ".chk":
+        return node_runner.fail(
+            "gen_fcc_dipfile requires a Gaussian formatted checkpoint (.fchk), "
+            f"not binary {input_name}"
+        )
+
     success = node_runner.subprocess(
         "gen_fcc_dipfile",
-        ["gen_fcc_dipfile", "-i", str(local_file.name), "-oe", "gaussian.eldip"],
+        ["gen_fcc_dipfile", "-i", str(input_name), "-oe", "gaussian.eldip"],
     )
 
     if not success or not os.path.exists("gaussian.eldip"):
-        return node_runner.fail("fcc_dipole failed or gaussian.eldip file not found")
+        details = "\n".join(
+            part for part in (node_runner.last_stdout, node_runner.last_stderr) if part
+        ).strip()
+        message = "fcc_dipole failed or gaussian.eldip file not found"
+        if details:
+            message = f"{message}\n{details}"
+        return node_runner.fail(message)
 
     outfile = f"gaussian.{state_number}.eldip"
 
