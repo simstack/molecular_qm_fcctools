@@ -16,11 +16,14 @@ from simstack.core.context import context
 from simstack.core.definitions import TaskStatus
 from simstack.core.node import node
 
+from molecular_qm_fcctools.nodes.fcc import fcc_dipole, fcc_make_plot, fcc_state
 from molecular_qm_fcctools.nodes.fc_classes import FC_ClassesInput, fc_classes
 
-from simstack.models import StringData, FloatData
+from simstack.models import ArrayList, IntData, StringData, FloatData
 
 import logging
+from simstack.models.files import FileStack
+from simstack.models.file_list import FileListIO
 from simstack.models.charts_artifact import create_simple_line_chart
 
 logger = logging.getLogger("vb_spectra")
