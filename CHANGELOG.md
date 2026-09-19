@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v0.6.7 (2026-09-19)
+
+### Bug Fixes
+
+- Use the injected NodeRunner in fcc_make_plot
+  ([#5](https://github.com/simstack/molecular_qm_fcctools/pull/5),
+  [`128aee8`](https://github.com/simstack/molecular_qm_fcctools/commit/128aee8c4d388fc7e970186fe8f69cd2fab34871))
+
+
 ## v0.6.6 (2026-09-19)
 
 ### Bug Fixes
