@@ -28,3 +28,5 @@ def test_fcc_helpers_reject_binary_chk():
 
     assert "formatted checkpoint (.fchk)" in getsource(fcc.fcc_state)
     assert "formatted checkpoint (.fchk)" in getsource(fcc.fcc_dipole)
+    assert "last_stdout" in getsource(fcc.fcc_state)
+    assert "last_stdout" in getsource(fcc.fcc_dipole)

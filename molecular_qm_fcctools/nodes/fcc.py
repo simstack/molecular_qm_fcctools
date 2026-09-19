@@ -63,11 +63,10 @@ def fcc_state(file_stack: FileStack, state_number: IntData, **kwargs) -> Simstac
     node_runner = kwargs["node_runner"]
     state_number = state_number.value
     node_runner.custom_name = f"state{state_number}"
-    node_runner.info("ffc_state started for {state_number}")
+    node_runner.info(f"fcc_state started for {state_number}")
     local_file = file_stack.get()
 
-
-    node_runner.info("ffc_state downloaded to {local_file}")
+    node_runner.info(f"fcc_state downloaded to {local_file}")
 
     # Copy file to cwd if it's not already there (and not the same file)
     file_to_cleanup = _copy_to_cwd_if_needed(node_runner, local_file)
@@ -89,7 +88,13 @@ def fcc_state(file_stack: FileStack, state_number: IntData, **kwargs) -> Simstac
     )
       
     if not success or not os.path.exists("gaussian.fcc"):
-        return node_runner.fail("fcc_state failed or gaussian.fcc file not found")
+        details = "\n".join(
+            part for part in (node_runner.last_stdout, node_runner.last_stderr) if part
+        ).strip()
+        message = "fcc_state failed or gaussian.fcc file not found"
+        if details:
+            message = f"{message}\n{details}"
+        return node_runner.fail(message)
         
     if not node_runner.subprocess(f"mv_file.{state_number}.fcc",
                             f"mv gaussian.fcc gaussian.{state_number}.fcc"):
@@ -140,7 +145,13 @@ def fcc_dipole(file_stack: FileStack, state_number: IntData, **kwargs) -> Simsta
     )
 
     if not success or not os.path.exists("gaussian.eldip"):
-        return node_runner.fail("fcc_dipole failed or gaussian.eldip file not found")
+        details = "\n".join(
+            part for part in (node_runner.last_stdout, node_runner.last_stderr) if part
+        ).strip()
+        message = "fcc_dipole failed or gaussian.eldip file not found"
+        if details:
+            message = f"{message}\n{details}"
+        return node_runner.fail(message)
 
     outfile = f"gaussian.{state_number}.eldip"
 
