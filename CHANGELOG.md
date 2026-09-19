@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.6.3 (2026-09-19)
+
+### Bug Fixes
+
+- Restore fcc_state and FileStack imports in vb_spectra
+  ([`6eeb013`](https://github.com/simstack/molecular_qm_fcctools/commit/6eeb0139377deb70475b4adc87b106a1632e5a5f))
+
+
 ## v0.6.2 (2026-09-17)
 
 ### Bug Fixes
