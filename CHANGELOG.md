@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.6.5 (2026-09-19)
+
+### Bug Fixes
+
+- Refactor `_formatted_checkpoint` to streamline parameter handling and update tests
+  ([`ff82f8a`](https://github.com/simstack/molecular_qm_fcctools/commit/ff82f8a82c2e87d17639c1702e6464a6bd86d081))
+
+
 ## v0.6.4 (2026-09-19)
 
 ### Bug Fixes
