@@ -213,9 +213,10 @@ def _as_qm_result(gaussian_result):
     return gaussian_result
 
 
-async def _formatted_checkpoint(qm_result, task_id, **kwargs):
+async def _formatted_checkpoint(qm_result, **kwargs):
     from molecular_qm_gaussian import formchk_checkpoint
 
+    task_id = kwargs.get("task_id", None)
     fchk_file = qm_result.files.find(r"gaussian\.fchk$")
     if fchk_file is not None:
         return fchk_file
@@ -290,7 +291,7 @@ async def vb_spectra(qm_input: QMInput, excited_state_functional_input: Function
             raise ValueError("gaussian ground-state result has no final_structure")
 
         optimized_geometry = Molecule.from_molecule(optimization_result.final_structure)
-        fchk_file = await _formatted_checkpoint(optimization_result, task_id, **kwargs)
+        fchk_file = await _formatted_checkpoint(optimization_result, **kwargs)
         ground_state_fcc_file = fcc_state(fchk_file, IntData(value=0), **kwargs)
 
         node_runner.info(f"ground_state_fcc_file: {str(ground_state_fcc_file)}")
@@ -341,7 +342,7 @@ async def vb_spectra(qm_input: QMInput, excited_state_functional_input: Function
                 await gaussian(excited_state_input, **gaussian_kwargs)
             )
             fchk_file = await _formatted_checkpoint(
-                excited_state_gaussian_result, task_id, **kwargs
+                excited_state_gaussian_result, **kwargs
             )
             excited_state_fcc_file = fcc_state(fchk_file, state_number, **kwargs)
             excited_state_dipole_file = fcc_dipole(fchk_file, state_number, **kwargs)
