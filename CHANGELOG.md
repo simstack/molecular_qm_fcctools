@@ -2,6 +2,23 @@
 
 <!-- version list -->
 
+## v0.6.4 (2026-09-19)
+
+### Bug Fixes
+
+- Enforce `.fchk` input requirement in FCC nodes and improve checkpoint handling
+  ([#2](https://github.com/simstack/molecular_qm_fcctools/pull/2),
+  [`65c217e`](https://github.com/simstack/molecular_qm_fcctools/commit/65c217eea0557d9f219bf9bc0527ee4f6f1a000d))
+
+- Include gen_fcc_state output when gaussian.fcc is missing
+  ([#2](https://github.com/simstack/molecular_qm_fcctools/pull/2),
+  [`65c217e`](https://github.com/simstack/molecular_qm_fcctools/commit/65c217eea0557d9f219bf9bc0527ee4f6f1a000d))
+
+- Pass formatted .fchk into gen_fcc_state
+  ([#2](https://github.com/simstack/molecular_qm_fcctools/pull/2),
+  [`65c217e`](https://github.com/simstack/molecular_qm_fcctools/commit/65c217eea0557d9f219bf9bc0527ee4f6f1a000d))
+
+
 ## v0.6.3 (2026-09-19)
 
 ### Bug Fixes
