@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v0.6.10 (2026-09-20)
+
+### Bug Fixes
+
+- Use molecule formula as vb_spectra P2 name
+  ([`67e5f4e`](https://github.com/simstack/molecular_qm_fcctools/commit/67e5f4e61d6b6bd9a0c444a9354c1f1880f2c272))
+
+### Chores
+
+- Update `molecular_qm_fcctools`
+  ([`5273f7a`](https://github.com/simstack/molecular_qm_fcctools/commit/5273f7a8232b0383bcb19ded357ef8850c545a43))
+
+
 ## v0.6.9 (2026-09-20)
 
 ### Bug Fixes
