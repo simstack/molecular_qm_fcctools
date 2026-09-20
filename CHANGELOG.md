@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.6.8 (2026-09-20)
+
+### Bug Fixes
+
+- Type annotate `node_runner` and correct spectra list length calculation in FCC plotting
+  ([`c87e80c`](https://github.com/simstack/molecular_qm_fcctools/commit/c87e80cd17a841c6711b59dda1f8ea69f8c68772))
+
+
 ## v0.6.7 (2026-09-19)
 
 ### Bug Fixes
