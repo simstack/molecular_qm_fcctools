@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.6.9 (2026-09-20)
+
+### Bug Fixes
+
+- Take gaussian.fchk from QMResult.files only
+  ([`863a289`](https://github.com/simstack/molecular_qm_fcctools/commit/863a2897351008adf0352b75e5aaa544aa1c9d4c))
+
+
 ## v0.6.8 (2026-09-20)
 
 ### Bug Fixes
