@@ -357,7 +357,7 @@ async def vb_spectra(qm_input: QMInput, excited_state_functional_input: Function
                 fc_classes_input.state_number = focus_state
                 reference_energy_model = FloatData(value=excited_states_energy[focus_state - 1])
                 iterative_refinement_result = iterative_refinement(fc_classes_input=fc_classes_input,
-                                                                   name=StringData(field_name="molecule_name",value=qm_input.name),
+                                                                   name=StringData(field_name="molecule_name",value=qm_input.molecule.formula),
                                                                    reference_energy_model=reference_energy_model, **kwargs)
                 if iterative_refinement_result.converged:
                     spectra_arrays.append(iterative_refinement_result.result.int_td_spectrum)

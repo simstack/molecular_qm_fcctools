@@ -48,6 +48,13 @@ def test_vb_spectra_enables_excited_states_toggle_before_td_scan():
     assert "excited_state_input.states = 20" not in src
 
 
+def test_vb_spectra_p2_uses_molecule_formula_for_iterative_refinement_name():
+    src = getsource(vs.vb_spectra)
+    assert "qm_input.name" not in src
+    assert "name" not in QMInput.model_fields
+    assert "qm_input.molecule.formula" in src
+
+
 def test_qm_input_keeps_td_states_when_excited_states_flag_is_set():
     molecule = Molecule(atoms=[Atom(element="C", x=0.0, y=0.0, z=0.0)])
     ground = QMInput(
