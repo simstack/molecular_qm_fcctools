@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.6.11 (2026-09-20)
+
+### Bug Fixes
+
+- Remove hardcoded spectra path in fc_classes and simplify file retrieval
+  ([`d56241b`](https://github.com/simstack/molecular_qm_fcctools/commit/d56241b3fa0ddf388f26be176f1518aeb40735de))
+
+
 ## v0.6.10 (2026-09-20)
 
 ### Bug Fixes
