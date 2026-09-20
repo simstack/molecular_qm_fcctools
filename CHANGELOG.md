@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.6.13 (2026-09-20)
+
+### Bug Fixes
+
+- Refactor fc_classes and fcc_state to improve file handling and test coverage
+  ([`7f29fd0`](https://github.com/simstack/molecular_qm_fcctools/commit/7f29fd005fc386945210ca14cdc86efa25e3164d))
+
+
 ## v0.6.12 (2026-09-20)
 
 ### Bug Fixes
