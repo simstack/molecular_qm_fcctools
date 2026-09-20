@@ -41,6 +41,20 @@ def test_fcc_helpers_reject_binary_chk():
     assert 'kwargs["node_runner"]' in getsource(fcc.fcc_dipole)
     assert "NodeRunner(" not in getsource(fcc.fcc_make_plot)
     assert "NodeRunner(" not in getsource(fcc.fcc_dipole)
+    assert "in_memory=False" not in getsource(fcc.fcc_state)
+    assert "in_memory=True" in getsource(fcc.fcc_state)
+
+
+def test_fc_classes_stages_relative_input_files_and_keeps_sources():
+    from molecular_qm_fcctools.nodes import fc_classes as fc_classes_mod
+
+    src = getsource(fc_classes_mod)
+    assert "STATE1_FILE = {state1_path}" not in src
+    assert "STATE1_FILE" in src
+    assert "state1.fcc" in src
+    assert "shutil.copy2" in src
+    assert "file.unlink()" not in src
+    assert "last_stderr" in src
 
 
 def test_vb_spectra_enables_excited_states_toggle_before_td_scan():

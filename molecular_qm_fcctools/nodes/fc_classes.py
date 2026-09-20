@@ -1,4 +1,5 @@
 import os
+import shutil
 import numpy as np
 from enum import Enum
 from pathlib import Path
@@ -158,7 +159,6 @@ def fc_classes(fc_classes_input: FC_ClassesInput, **kwargs) -> SimstackResult:
             files (list[simstack.models.files.FileStack]): List of output files.
     """
     node_runner = NodeRunner("fc_classes", logger= logger, **kwargs)
-    local_files = []
     try:
         node_runner.custom_name = f"state{fc_classes_input.state_number}"
         state_number = fc_classes_input.state_number
@@ -172,29 +172,36 @@ def fc_classes(fc_classes_input: FC_ClassesInput, **kwargs) -> SimstackResult:
         if len(file_list) != 3:
             return node_runner.fail(f"input file list must have exactly 3 files")
 
-        state1_path = file_list[0].get()
-        state2_path = file_list[1].get()
-        eldip_path = file_list[2].get()
-
-        local_files = [state1_path, state2_path, eldip_path]
-
+        input_roles = (
+            ("STATE1_FILE", "state1.fcc", file_list[0]),
+            ("STATE2_FILE", "state2.fcc", file_list[1]),
+            ("ELDIP_FILE", "state.eldip", file_list[2]),
+        )
         with open("fcc.inp", "w") as input_file:
             input_file.write(fc_classes_input.input_file())
-            input_file.write(f"STATE1_FILE = {state1_path}\n")
-            input_file.write(f"STATE2_FILE = {state2_path}\n")
-            input_file.write(f"ELDIP_FILE = {eldip_path}\n")
+            for file_key, dest_name, file_stack in input_roles:
+                source = Path(file_stack.get())
+                dest = Path.cwd() / dest_name
+                if not source.exists():
+                    return node_runner.fail(f"{file_key} does not exist at {source}")
+                if source.resolve() != dest.resolve():
+                    shutil.copy2(source, dest)
+                input_file.write(f"{file_key} = {dest_name}\n")
 
         node_runner.info_files.append(FileStack.from_local_file("fcc.inp", in_memory=True, is_hashable=True, secure_source=True))
         result_ok = node_runner.subprocess("fcclasses3", ["fcclasses3", "fcc.inp"])
 
-        if not os.path.exists("fcc.out"):
-            return node_runner.fail(f"fcc.out not found")
+        if not result_ok or not os.path.exists("fcc.out"):
+            details = "\n".join(
+                part for part in (node_runner.last_stdout, node_runner.last_stderr) if part
+            ).strip()
+            message = "fcclasses3 failed" if not result_ok else "fcc.out not found"
+            if details:
+                message = f"{message}\n{details}"
+            return node_runner.fail(message)
 
         file_stack = FileStack.from_local_file("fcc.out", in_memory=True, is_hashable=True, secure_source=True)
         node_runner.info_files.append(file_stack)
-
-        if not result_ok:
-            return node_runner.fail("fc_classes failed")
 
         for name in ["Int_TD", "LS_TD"]:
             if not os.path.exists(f"spec_{name}.dat"):
@@ -215,7 +222,3 @@ def fc_classes(fc_classes_input: FC_ClassesInput, **kwargs) -> SimstackResult:
         return node_runner.succeed()
     except Exception as e:
         return node_runner.fail(f"Error: {str(e)}")
-    finally:
-        for file in local_files:
-            if file.exists():
-                file.unlink()

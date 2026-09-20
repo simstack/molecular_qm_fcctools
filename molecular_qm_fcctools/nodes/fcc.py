@@ -98,8 +98,12 @@ def fcc_state(file_stack: FileStack, state_number: IntData, **kwargs) -> Simstac
             file_to_cleanup.unlink()
             node_runner.info(f"Deleted local file: {file_to_cleanup}")
         return node_runner.fail("could not move output file")
-    node_runner.file_stack = FileStack.from_local_file(f"gaussian.{state_number}.fcc", in_memory=False, is_hashable=True,
-                                                       secure_source=True)
+    node_runner.file_stack = FileStack.from_local_file(
+        f"gaussian.{state_number}.fcc",
+        in_memory=True,
+        is_hashable=True,
+        secure_source=True,
+    )
 
     if file_to_cleanup and file_to_cleanup.exists():
         file_to_cleanup.unlink()
