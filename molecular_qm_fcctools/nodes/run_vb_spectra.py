@@ -1,6 +1,8 @@
 from datetime import datetime
 from pathlib import Path
 import asyncio
+import sys
+import types
 from typing import Any
 
 from numpy import ndarray
@@ -27,7 +29,6 @@ from simstack.models import ArtifactMapping, ArtifactModel, FloatData, Parameter
     DataSetTuple, DataSetTupleSelectionField, DataSet, DataSetSelection
 from simstack.models.array_storage import ArrayStorage
 from simstack.models.charts_artifact import ChartArtifactModel, create_multi_series_line_chart
-from simstack.util.get_module_path import get_module_path
 from scipy.interpolate import interp1d
 
 import logging
@@ -728,38 +729,48 @@ async def process_one_file(filepath: StringData, **kwargs) -> SimstackResult:
     return node_runner.succeed()
 
 async def init_artifacts():
-    """
-    Initialize the module and register artifact mappings for spectra and plots.
-    
-     
-    """
+    """Register plot artifact mappings using this module's import path."""
     if not context.initialized:
         await context.initialize(path=__file__)
-    current_module_path = get_module_path(__file__)
     spectra_artifact_mapping = ArtifactMapping(
         name="spectra_artifact_mapping",
-        regex_pattern=r".*\.vb_spectra\.iterative_refinement",
-        function_mapping=current_module_path + ".fcc_classes_data"
+        regex_pattern=r".*\.vb_spectra\.(iterative_refinement|fc_classes)$",
+        function_mapping=f"{__name__}.fcc_classes_data"
     )
     await register_artifact_mapping(spectra_artifact_mapping)
     all_plots_mapping = ArtifactMapping(
         name="all_spectra_artifact_mapping",
         regex_pattern=r".*\.vb_spectra$",
-        function_mapping=current_module_path + ".vb_spectra_plots"
+        function_mapping=f"{__name__}.vb_spectra_plots"
     )
     await register_artifact_mapping(all_plots_mapping)
     spectra_plot_mapping = ArtifactMapping(
         name="spectra_plot_mapping",
         regex_pattern=r".*\.compute_uv_vis_spectrum$",
-        function_mapping=current_module_path + ".exp_vs_computed_spectra"
+        function_mapping=f"{__name__}.exp_vs_computed_spectra"
     )
     await register_artifact_mapping(spectra_plot_mapping)
     many_spectra_table_mapping = ArtifactMapping(
         name="many_spectra_table_mapping",
         regex_pattern=r".*\.compute_many_spectra$",
-        function_mapping=current_module_path + ".make_summary_table"
+        function_mapping=f"{__name__}.make_summary_table"
     )
     await register_artifact_mapping(many_spectra_table_mapping)
+
+
+# ArtifactMapping.function_mapping is still the pre-extraction import path in
+# existing MongoDB rows. Keep that path importable for create_artifacts.
+_LEGACY_RUN_VB_SPECTRA_MODULE = "examples.science.electronic_structure.spectra.run_vb_spectra"
+_legacy_parent = ""
+for _legacy_part in _LEGACY_RUN_VB_SPECTRA_MODULE.split("."):
+    _legacy_parent = f"{_legacy_parent}.{_legacy_part}" if _legacy_parent else _legacy_part
+    sys.modules.setdefault(_legacy_parent, types.ModuleType(_legacy_parent))
+_legacy_module = sys.modules[_LEGACY_RUN_VB_SPECTRA_MODULE]
+_legacy_module.fcc_classes_data = fcc_classes_data
+_legacy_module.vb_spectra_plots = vb_spectra_plots
+_legacy_module.exp_vs_computed_spectra = exp_vs_computed_spectra
+_legacy_module.make_summary_table = make_summary_table
+
 
 def compute_frequency_range_95_percent(frequencies, intensities):
     """

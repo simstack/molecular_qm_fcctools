@@ -5,11 +5,13 @@ vb_spectra crashed with NameError on fcc_state / FileStack.
 """
 
 from inspect import getsource
+import importlib
 
 from molecular_qm_models import Atom, Molecule, QMInput
 from molecular_qm_models.basis_set import BasisSet, BasisSetEnum
 from molecular_qm_models.density_functional import Functional, FunctionalEnum
 
+from molecular_qm_fcctools.nodes import run_vb_spectra as rvs
 from molecular_qm_fcctools.nodes import vibrational_spectra as vs
 
 
@@ -55,6 +57,19 @@ def test_vb_spectra_p2_uses_molecule_formula_for_iterative_refinement_name():
     assert "qm_input.molecule.formula" in src
 
 
+def test_iterative_refinement_persists_converged_as_boolean_data():
+    """Raw bools and nested SimstackResult are dropped; a lone chart then unwraps."""
+    src = getsource(vs.iterative_refinement)
+    assert "node_runner.converged = True" not in src
+    assert "node_runner.converged = False" not in src
+    assert 'BooleanData(field_name="converged"' in src
+    assert "node_runner.int_td_spectrum" in src
+    caller = getsource(vs.vb_spectra)
+    assert "iterative_refinement_result.result.int_td_spectrum" not in caller
+    assert "isinstance(iterative_refinement_result, SimstackResult)" in caller
+    assert "iterative_refinement_result.converged.value" in caller
+
+
 def test_qm_input_keeps_td_states_when_excited_states_flag_is_set():
     molecule = Molecule(atoms=[Atom(element="C", x=0.0, y=0.0, z=0.0)])
     ground = QMInput(
@@ -71,3 +86,19 @@ def test_qm_input_keeps_td_states_when_excited_states_flag_is_set():
     excited = QMInput(**data)
     assert excited.states == 20
     assert excited.excited_states is True
+
+
+def test_fcc_classes_data_uses_importable_function_mapping():
+    src = getsource(rvs.init_artifacts)
+    assert "get_module_path" not in src
+    assert 'f"{__name__}.fcc_classes_data"' in src
+    assert 'f"{__name__}.vb_spectra_plots"' in src
+    assert r".*\.vb_spectra\.(iterative_refinement|fc_classes)$" in src
+
+
+def test_legacy_examples_path_imports_fcc_classes_data():
+    module = importlib.import_module(
+        "examples.science.electronic_structure.spectra.run_vb_spectra"
+    )
+    assert module.fcc_classes_data is rvs.fcc_classes_data
+    assert module.vb_spectra_plots is rvs.vb_spectra_plots

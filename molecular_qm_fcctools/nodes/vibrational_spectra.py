@@ -19,7 +19,7 @@ from simstack.core.node import node
 from molecular_qm_fcctools.nodes.fcc import fcc_dipole, fcc_make_plot, fcc_state
 from molecular_qm_fcctools.nodes.fc_classes import FC_ClassesInput, fc_classes
 
-from simstack.models import ArrayList, IntData, StringData, FloatData
+from simstack.models import ArrayList, BooleanData, IntData, StringData, FloatData
 
 import logging
 from simstack.models.files import FileStack
@@ -141,7 +141,16 @@ def fix_bounds(
 
 @node
 def iterative_refinement(fc_classes_input: FC_ClassesInput, name: StringData,
-                         reference_energy_model: FloatData,  **kwargs):
+                         reference_energy_model: FloatData,  **kwargs) -> SimstackResult:
+    """
+    Adjust the FCClasses spectral window until intensities look sane.
+
+    SimstackResult:
+        converged (BooleanData): Whether a stable spectral window was found.
+        int_td_spectrum (ArrayStorage): Intensity TD spectrum when converged.
+
+    Called Nodes: fc_classes
+    """
     node_runner = kwargs.get('node_runner', None)
     task_id = kwargs.get("task_id", None)
     fc_classes_copy = FC_ClassesInput(**fc_classes_input.model_dump(exclude={"id"}))
@@ -196,12 +205,12 @@ def iterative_refinement(fc_classes_input: FC_ClassesInput, name: StringData,
 
         # If no change was needed, we accept the window.
         if not changed:
-            node_runner.result = fc_classes_result
-            node_runner.converged = True
+            node_runner.int_td_spectrum = fc_classes_result.int_td_spectrum
+            node_runner.converged = BooleanData(field_name="converged", value=True)
             node_runner.info(f"accepted window at loop {loop}: spcmin={new_min} spcmax={new_max}")
             return node_runner.succeed()
 
-    node_runner.converged = False
+    node_runner.converged = BooleanData(field_name="converged", value=False)
     return node_runner.succeed()
 
 
@@ -359,8 +368,23 @@ async def vb_spectra(qm_input: QMInput, excited_state_functional_input: Function
                 iterative_refinement_result = iterative_refinement(fc_classes_input=fc_classes_input,
                                                                    name=StringData(field_name="molecule_name",value=qm_input.molecule.formula),
                                                                    reference_energy_model=reference_energy_model, **kwargs)
-                if iterative_refinement_result.converged:
-                    spectra_arrays.append(iterative_refinement_result.result.int_td_spectrum)
+                if (
+                    not isinstance(iterative_refinement_result, SimstackResult)
+                    or iterative_refinement_result.status != TaskStatus.COMPLETED
+                ):
+                    return node_runner.fail(
+                        f"unexpected result in iterative_refinement {iterative_refinement_result} [{type(iterative_refinement_result)}]"
+                    )
+                if not hasattr(iterative_refinement_result, "converged"):
+                    raise ValueError(
+                        "iterative_refinement completed without a converged field"
+                    )
+                if iterative_refinement_result.converged.value:
+                    if not hasattr(iterative_refinement_result, "int_td_spectrum"):
+                        raise ValueError(
+                            "iterative_refinement converged but int_td_spectrum is missing"
+                        )
+                    spectra_arrays.append(iterative_refinement_result.int_td_spectrum)
                 else:
                     node_runner.log(f"iterative_refinement failed for focus state {focus_state}")
 
