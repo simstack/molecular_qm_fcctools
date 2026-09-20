@@ -186,19 +186,18 @@ def fcc_make_plot(spectra_list: ArrayList, **kwargs) -> SimstackResult:
         allspectra (ArrayStorage): An ArrayStorage object containing the aggregated spectrum data.
 
     """
-    node_runner = kwargs["node_runner"]
+    node_runner: NodeRunner = kwargs["node_runner"]
     try:
         import numpy as np
         from scipy import interpolate
         do_average = False
-        local_dir = Path("../../../spectra")
 
         xs = []
         ys = []
         xmax = -100.
         xmin = 9999999.
         dx = 99999.
-        nfiles = spectra_list.length
+        nfiles = len(spectra_list)
         for spectrum in spectra_list:
 
             node_runner.info(f"fcc-make-plot plotting data in file: {str(spectrum.name)}")
