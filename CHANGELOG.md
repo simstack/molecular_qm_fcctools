@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.6.12 (2026-09-20)
+
+### Bug Fixes
+
+- Refactor iterative_refinement to use BooleanData for convergence and update artifact mappings
+  ([`6e0d382`](https://github.com/simstack/molecular_qm_fcctools/commit/6e0d38259c059fe586e7639645f65bee07964b42))
+
+
 ## v0.6.11 (2026-09-20)
 
 ### Bug Fixes
