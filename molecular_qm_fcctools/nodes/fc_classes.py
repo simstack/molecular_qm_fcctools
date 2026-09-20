@@ -166,15 +166,15 @@ def fc_classes(fc_classes_input: FC_ClassesInput, **kwargs) -> SimstackResult:
 
         node_runner.info(f"processing spectra for state: {state_number}")
 
-        local_dir = Path("../../../spectra")
+
         file_list = file_list_io.file_list
 
         if len(file_list) != 3:
             return node_runner.fail(f"input file list must have exactly 3 files")
 
-        state1_path = file_list[0].get(local_dir)
-        state2_path = file_list[1].get(local_dir)
-        eldip_path = file_list[2].get(local_dir)
+        state1_path = file_list[0].get()
+        state2_path = file_list[1].get()
+        eldip_path = file_list[2].get()
 
         local_files = [state1_path, state2_path, eldip_path]
 
