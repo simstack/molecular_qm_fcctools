@@ -77,6 +77,29 @@ def eV_to_nm(energy_eV):
     return 1239.84 / energy_eV
 
 
+def spectrum_x_to_nm(x_values):
+    """
+    Return spectrum x-axis values in nm.
+
+    FCclasses spectra are stored in eV (typical UV–Vis range is below 20 eV).
+    Plot artifacts and experimental curves already in nm have minima above 50 nm.
+    """
+    x_values = np.asarray(x_values, dtype=float)
+    if x_values.size == 0:
+        raise ValueError("spectrum x values are empty")
+    if np.any(x_values <= 0) or not np.all(np.isfinite(x_values)):
+        raise ValueError("spectrum x values must be positive and finite")
+    x_min = float(np.min(x_values))
+    x_max = float(np.max(x_values))
+    if x_max < 20.0:
+        return eV_to_nm(x_values)
+    if x_min > 50.0:
+        return x_values
+    raise ValueError(
+        f"spectrum x-axis values [{x_min}, {x_max}] are not unambiguously eV or nm"
+    )
+
+
 def nm_to_eV(wavelength_nm):
     """
     Convert wavelength in nm to energy in eV

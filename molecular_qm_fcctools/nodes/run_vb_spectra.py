@@ -15,7 +15,7 @@ from simstack.core.context import context
 
 from molecular_qm_fcctools.nodes.fc_classes import FC_ClassesInput
 from molecular_qm_fcctools.nodes.plot_spectra import make_multi_line_chart
-from molecular_qm_fcctools.nodes.spectra_analysis import process_experimental_spectrum
+from molecular_qm_fcctools.nodes.spectra_analysis import process_experimental_spectrum, spectrum_x_to_nm
 from molecular_qm_fcctools.nodes.vibrational_spectra import vb_spectra
 from molecular_qm_models.basis_set import BasisSet, BasisSetEnum, BasisSetModel
 from molecular_qm_models.density_functional import FunctionalEnum, Functional, FunctionalModel
@@ -62,13 +62,13 @@ def fcc_classes_data(argument: ArtifactArguments):
         logger.error(f"fcc_classes_data: No spectrum data found task_id: {task_id}")
         return None
 
-    frequencies = data.T[0]
+    wavelengths = spectrum_x_to_nm(data.T[0])
     intensities = data.T[1]
     
-    plot_data = [{ "frequency": frequency, "intensity": intensity } for frequency, intensity in zip(frequencies, intensities)]
+    plot_data = [{ "frequency": frequency, "intensity": intensity } for frequency, intensity in zip(wavelengths, intensities)]
     
-    # Compute 95% frequency range
-    freq_range = compute_frequency_range_95_percent(frequencies, intensities)
+    # Compute 95% wavelength range
+    freq_range = compute_frequency_range_95_percent(wavelengths, intensities)
     
     state_number = argument.fc_classes_input.state_number if argument.fc_classes_input.state_number else 0
     artifact = ArtifactModel(name=f"state_{state_number}", path="none")
@@ -77,9 +77,17 @@ def fcc_classes_data(argument: ArtifactArguments):
     artifact.data['xmax'] = freq_range['xmax']
     
     logger.info(f"Artifact FCCLASSES: task_id: {argument.task_id} state_number: {state_number}")
-    logger.info(f"Artifact FCCLASSES: task_id: {argument.task_id} 95% frequency range: {freq_range['xmin']:.3f} to {freq_range['xmax']:.3f}")
+    logger.info(f"Artifact FCCLASSES: task_id: {argument.task_id} 95% wavelength range: {freq_range['xmin']:.3f} to {freq_range['xmax']:.3f} nm")
 
-    chart = make_multi_line_chart([artifact], task_id=argument.task_id, x_key="frequency", y_key="intensity", chart_title=f"State {state_number}")
+    chart = make_multi_line_chart(
+        [artifact],
+        task_id=argument.task_id,
+        x_key="frequency",
+        y_key="intensity",
+        chart_title=f"State {state_number}",
+        x_axis_title="Wavelength (nm)",
+        y_axis_title="Intensity",
+    )
 
     return [chart, artifact]
 
@@ -93,15 +101,13 @@ def vb_spectra_plots(argument: ArtifactArguments):
     try:
         plot_data = []
         data_array = argument.result.all_spectra.get_array()
-        # convert to nm
-        frequencies = 1234.7 /  data_array[0]
+        wavelengths = spectrum_x_to_nm(data_array[0])
         intensities = data_array[1]
 
-        for frequency, intensity in zip(frequencies, intensities):
-            plot_data.append({"frequency": frequency, "intensity": intensity})
+        for wavelength, intensity in zip(wavelengths, intensities):
+            plot_data.append({"frequency": wavelength, "intensity": intensity})
 
-        # Compute 95% frequency range
-        freq_range = compute_frequency_range_95_percent(frequencies, intensities)
+        freq_range = compute_frequency_range_95_percent(wavelengths, intensities)
 
         for artifact in argument.child_artifacts:
             logger.info(f"Artifact: task_id: {argument.task_id} Child artifact: {artifact.name}")
@@ -111,18 +117,20 @@ def vb_spectra_plots(argument: ArtifactArguments):
         artifact.data['xmin'] = freq_range['xmin']
         artifact.data['xmax'] = freq_range['xmax']
 
-        # Also add frequency range to child artifacts
         for child_artifact in argument.child_artifacts:
             if 'plot_data' in child_artifact.data:
-                child_frequencies = np.array([point['frequency'] for point in child_artifact.data['plot_data']])
+                child_x = np.array([point['frequency'] for point in child_artifact.data['plot_data']])
                 child_intensities = np.array([point['intensity'] for point in child_artifact.data['plot_data']])
-                child_freq_range = compute_frequency_range_95_percent(child_frequencies, child_intensities)
+                child_wavelengths = spectrum_x_to_nm(child_x)
+                for point, wavelength in zip(child_artifact.data['plot_data'], child_wavelengths):
+                    point['frequency'] = float(wavelength)
+                child_freq_range = compute_frequency_range_95_percent(child_wavelengths, child_intensities)
                 child_artifact.data['xmin'] = child_freq_range['xmin']
                 child_artifact.data['xmax'] = child_freq_range['xmax']
 
         argument.child_artifacts.append(artifact)
         chart = make_multi_line_chart(argument.child_artifacts, task_id=argument.task_id,
-                                      x_key="frequency", y_key="intensity",x_axis_title="Frequency",
+                                      x_key="frequency", y_key="intensity", x_axis_title="Wavelength (nm)",
                                       y_axis_title="Intensity (normalized)")
         return [chart, artifact]
     except Exception as e:
