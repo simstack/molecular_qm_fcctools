@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.6.14 (2026-09-22)
+
+### Bug Fixes
+
+- Add `spectrum_x_to_nm` conversion and integrate with VB spectra processing
+  ([`c81f23c`](https://github.com/simstack/molecular_qm_fcctools/commit/c81f23c452f23a6a2c6983cd20f29979890f4ff9))
+
+
 ## v0.6.13 (2026-09-20)
 
 ### Bug Fixes
