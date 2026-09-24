@@ -14,7 +14,6 @@ from simstack.core.artifacts import register_artifact_mapping, ArtifactArguments
 from simstack.core.context import context
 
 from molecular_qm_fcctools.nodes.fc_classes import FC_ClassesInput
-from molecular_qm_fcctools.nodes.plot_spectra import make_multi_line_chart
 from molecular_qm_fcctools.nodes.spectra_analysis import process_experimental_spectrum, spectrum_x_to_nm
 from molecular_qm_fcctools.nodes.vibrational_spectra import vb_spectra
 from molecular_qm_models.basis_set import BasisSet, BasisSetEnum, BasisSetModel
@@ -72,18 +71,7 @@ def fcc_classes_data(argument: ArtifactArguments):
         f"Artifact FCCLASSES: task_id: {argument.task_id} 95% wavelength range: "
         f"{artifact.data['xmin']:.3f} to {artifact.data['xmax']:.3f} nm"
     )
-
-    chart = make_multi_line_chart(
-        [artifact],
-        task_id=argument.task_id,
-        x_key="frequency",
-        y_key="intensity",
-        chart_title=f"State {state_number}",
-        x_axis_title="Wavelength (nm)",
-        y_axis_title="Intensity",
-    )
-
-    return [chart, artifact]
+    return artifact
 
 
 def vb_spectra_plots(argument: ArtifactArguments):
@@ -98,7 +86,7 @@ def vb_spectra_plots(argument: ArtifactArguments):
         intensities = data_array[1]
         artifact = spectrum_plot_artifact("full_spectrum", wavelengths, intensities)
 
-        chart_artifacts = []
+        artifacts = []
         seen_names = set()
         for child_artifact in argument.child_artifacts:
             logger.info(f"Artifact: task_id: {argument.task_id} Child artifact: {child_artifact.name}")
@@ -111,20 +99,12 @@ def vb_spectra_plots(argument: ArtifactArguments):
             child_x = np.array([point["frequency"] for point in plot_data])
             child_intensities = np.array([point["intensity"] for point in plot_data])
             child_wavelengths = spectrum_x_to_nm(child_x)
-            chart_artifacts.append(
+            artifacts.append(
                 spectrum_plot_artifact(child_artifact.name, child_wavelengths, child_intensities)
             )
 
-        chart_artifacts.append(artifact)
-        chart = make_multi_line_chart(
-            chart_artifacts,
-            task_id=argument.task_id,
-            x_key="frequency",
-            y_key="intensity",
-            x_axis_title="Wavelength (nm)",
-            y_axis_title="Intensity (normalized)",
-        )
-        return [chart, artifact]
+        artifacts.append(artifact)
+        return artifacts
     except Exception as e:
         logger.exception(f"Error creating plot artifact: task_id: {argument.task_id} {str(e)}")
         return None
