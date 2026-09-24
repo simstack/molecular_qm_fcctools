@@ -64,20 +64,14 @@ def fcc_classes_data(argument: ArtifactArguments):
 
     wavelengths = spectrum_x_to_nm(data.T[0])
     intensities = data.T[1]
-    
-    plot_data = [{ "frequency": frequency, "intensity": intensity } for frequency, intensity in zip(wavelengths, intensities)]
-    
-    # Compute 95% wavelength range
-    freq_range = compute_frequency_range_95_percent(wavelengths, intensities)
-    
     state_number = argument.fc_classes_input.state_number if argument.fc_classes_input.state_number else 0
-    artifact = ArtifactModel(name=f"state_{state_number}", path="none")
-    artifact.data['plot_data'] = plot_data
-    artifact.data['xmin'] = freq_range['xmin']
-    artifact.data['xmax'] = freq_range['xmax']
+    artifact = spectrum_plot_artifact(f"state_{state_number}", wavelengths, intensities)
     
     logger.info(f"Artifact FCCLASSES: task_id: {argument.task_id} state_number: {state_number}")
-    logger.info(f"Artifact FCCLASSES: task_id: {argument.task_id} 95% wavelength range: {freq_range['xmin']:.3f} to {freq_range['xmax']:.3f} nm")
+    logger.info(
+        f"Artifact FCCLASSES: task_id: {argument.task_id} 95% wavelength range: "
+        f"{artifact.data['xmin']:.3f} to {artifact.data['xmax']:.3f} nm"
+    )
 
     chart = make_multi_line_chart(
         [artifact],
@@ -99,39 +93,37 @@ def vb_spectra_plots(argument: ArtifactArguments):
     :return: ArtifactModel with the plot data.
     """
     try:
-        plot_data = []
         data_array = argument.result.all_spectra.get_array()
         wavelengths = spectrum_x_to_nm(data_array[0])
         intensities = data_array[1]
+        artifact = spectrum_plot_artifact("full_spectrum", wavelengths, intensities)
 
-        for wavelength, intensity in zip(wavelengths, intensities):
-            plot_data.append({"frequency": wavelength, "intensity": intensity})
-
-        freq_range = compute_frequency_range_95_percent(wavelengths, intensities)
-
-        for artifact in argument.child_artifacts:
-            logger.info(f"Artifact: task_id: {argument.task_id} Child artifact: {artifact.name}")
-
-        artifact = ArtifactModel(name="full_spectrum", path="none")
-        artifact.data['plot_data'] = plot_data
-        artifact.data['xmin'] = freq_range['xmin']
-        artifact.data['xmax'] = freq_range['xmax']
-
+        chart_artifacts = []
+        seen_names = set()
         for child_artifact in argument.child_artifacts:
-            if 'plot_data' in child_artifact.data:
-                child_x = np.array([point['frequency'] for point in child_artifact.data['plot_data']])
-                child_intensities = np.array([point['intensity'] for point in child_artifact.data['plot_data']])
-                child_wavelengths = spectrum_x_to_nm(child_x)
-                for point, wavelength in zip(child_artifact.data['plot_data'], child_wavelengths):
-                    point['frequency'] = float(wavelength)
-                child_freq_range = compute_frequency_range_95_percent(child_wavelengths, child_intensities)
-                child_artifact.data['xmin'] = child_freq_range['xmin']
-                child_artifact.data['xmax'] = child_freq_range['xmax']
+            logger.info(f"Artifact: task_id: {argument.task_id} Child artifact: {child_artifact.name}")
+            plot_data = child_artifact.data.get("plot_data")
+            if not plot_data:
+                continue
+            if child_artifact.name in seen_names:
+                continue
+            seen_names.add(child_artifact.name)
+            child_x = np.array([point["frequency"] for point in plot_data])
+            child_intensities = np.array([point["intensity"] for point in plot_data])
+            child_wavelengths = spectrum_x_to_nm(child_x)
+            chart_artifacts.append(
+                spectrum_plot_artifact(child_artifact.name, child_wavelengths, child_intensities)
+            )
 
-        argument.child_artifacts.append(artifact)
-        chart = make_multi_line_chart(argument.child_artifacts, task_id=argument.task_id,
-                                      x_key="frequency", y_key="intensity", x_axis_title="Wavelength (nm)",
-                                      y_axis_title="Intensity (normalized)")
+        chart_artifacts.append(artifact)
+        chart = make_multi_line_chart(
+            chart_artifacts,
+            task_id=argument.task_id,
+            x_key="frequency",
+            y_key="intensity",
+            x_axis_title="Wavelength (nm)",
+            y_axis_title="Intensity (normalized)",
+        )
         return [chart, artifact]
     except Exception as e:
         logger.exception(f"Error creating plot artifact: task_id: {argument.task_id} {str(e)}")
@@ -778,6 +770,28 @@ _legacy_module.fcc_classes_data = fcc_classes_data
 _legacy_module.vb_spectra_plots = vb_spectra_plots
 _legacy_module.exp_vs_computed_spectra = exp_vs_computed_spectra
 _legacy_module.make_summary_table = make_summary_table
+
+
+def spectrum_plot_artifact(name, wavelengths, intensities):
+    plot_data = [
+        {"frequency": float(wavelength), "intensity": float(intensity)}
+        for wavelength, intensity in zip(wavelengths, intensities)
+    ]
+    if not plot_data:
+        raise ValueError(f"{name} plot_data is empty")
+    freq_range = compute_frequency_range_95_percent(
+        np.asarray(wavelengths, dtype=float),
+        np.asarray(intensities, dtype=float),
+    )
+    return ArtifactModel(
+        name=name,
+        path="none",
+        data={
+            "plot_data": plot_data,
+            "xmin": float(freq_range["xmin"]),
+            "xmax": float(freq_range["xmax"]),
+        },
+    )
 
 
 def compute_frequency_range_95_percent(frequencies, intensities):

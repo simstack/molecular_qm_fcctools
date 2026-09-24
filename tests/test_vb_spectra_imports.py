@@ -154,14 +154,16 @@ def test_spectrum_x_to_nm_converts_ev_and_leaves_nm():
     ]
     plot_argument = ArtifactArguments(result=SimpleNamespace(all_spectra=all_spectra))
     plot_argument.child_artifacts = [child]
-    _, full_spectrum = rvs.vb_spectra_plots(plot_argument)
+    chart, full_spectrum = rvs.vb_spectra_plots(plot_argument)
     np.testing.assert_allclose(
         [point["frequency"] for point in full_spectrum.data["plot_data"]],
         expected_nm,
     )
-    np.testing.assert_allclose(
-        [point["frequency"] for point in child.data["plot_data"]],
-        expected_nm,
+    assert min(row["frequency"] for row in chart.data) > 50.0
+    assert "data" in full_spectrum.model_fields_set
+    assert all(
+        type(point["frequency"]) is float and type(point["intensity"]) is float
+        for point in full_spectrum.data["plot_data"]
     )
 
     already_nm_child = ArtifactModel(name="state_2", path="none")
@@ -171,11 +173,12 @@ def test_spectrum_x_to_nm_converts_ev_and_leaves_nm():
     ]
     nm_argument = ArtifactArguments(result=SimpleNamespace(all_spectra=all_spectra))
     nm_argument.child_artifacts = [already_nm_child]
-    rvs.vb_spectra_plots(nm_argument)
+    nm_chart, _ = rvs.vb_spectra_plots(nm_argument)
     np.testing.assert_allclose(
         [point["frequency"] for point in already_nm_child.data["plot_data"]],
         expected_nm,
     )
+    assert min(row["frequency"] for row in nm_chart.data) > 50.0
 
     with pytest.raises(ValueError, match="not unambiguously eV or nm"):
         spectrum_x_to_nm(np.array([10.0, 80.0]))
