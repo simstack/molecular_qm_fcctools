@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.6.15 (2026-09-24)
+
+### Bug Fixes
+
+- Refactor VB spectra plotting to use `spectrum_plot_artifact`
+  ([`23856d3`](https://github.com/simstack/molecular_qm_fcctools/commit/23856d34e9e4e321736d489ba676cffd330df356))
+
+
 ## v0.6.14 (2026-09-22)
 
 ### Bug Fixes
