@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.6.16 (2026-09-24)
+
+### Bug Fixes
+
+- Save only ArtifactModel plot data for vb_spectra artifacts
+  ([`778f3f9`](https://github.com/simstack/molecular_qm_fcctools/commit/778f3f95236f94fea09bc08f0e017f3b35ae6286))
+
+
 ## v0.6.15 (2026-09-24)
 
 ### Bug Fixes
