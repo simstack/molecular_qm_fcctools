@@ -112,23 +112,40 @@ def vb_spectra_plots(argument: ArtifactArguments):
             )
 
         artifacts.append(artifact)
-        series = []
+        chart_rows = [
+            {"frequency": float(wavelength), "full_spectrum": float(intensity)}
+            for wavelength, intensity in zip(wavelengths, intensities)
+        ]
+        grid = np.asarray(wavelengths, dtype=float)
+        y_keys = [item.name for item in artifacts]
         for item in artifacts:
-            series_data = item.data["plot_data"]
-            logger.info(
-                f"Artifact: task_id: {argument.task_id} All spectra series {item.name} points={len(series_data)}"
+            if item.name == "full_spectrum":
+                continue
+            plot_data = item.data["plot_data"]
+            child_x = np.array([point["frequency"] for point in plot_data], dtype=float)
+            child_y = np.array([point["intensity"] for point in plot_data], dtype=float)
+            if child_x.size < 2:
+                raise ValueError(f"{item.name} needs at least 2 points to overlay on All spectra")
+            sampled = interp1d(child_x, child_y, bounds_error=False, fill_value=np.nan)(grid)
+            for row, value in zip(chart_rows, sampled):
+                if np.isfinite(value):
+                    row[item.name] = float(value)
+        series = [
+            AGLineSeriesConfig(
+                type="line",
+                xKey="frequency",
+                yKey=y_key,
+                title=y_key,
+                data=chart_rows,
             )
-            series.append(
-                AGLineSeriesConfig(
-                    type="line",
-                    xKey="frequency",
-                    yKey="intensity",
-                    title=item.name,
-                    data=series_data,
-                )
-            )
+            for y_key in y_keys
+        ]
+        logger.info(
+            f"Artifact: task_id: {argument.task_id} All spectra points={len(chart_rows)} y_keys={y_keys}"
+        )
         chart_artifact = ChartArtifactModel(
             parent_id=argument.task_id,
+            data=chart_rows,
             title=AGChartTitleConfig(text="All spectra"),
             series=series,
             axes=[

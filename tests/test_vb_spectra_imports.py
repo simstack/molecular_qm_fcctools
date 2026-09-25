@@ -173,16 +173,16 @@ def test_spectrum_x_to_nm_converts_ev_and_leaves_nm():
     )
     chart = artifacts[-1]
     assert chart.series
-    assert all(len(series.data) > 0 for series in chart.series)
-    assert [series.title for series in chart.series] == ["state_1", "full_spectrum"]
-    assert all(series.yKey == "intensity" for series in chart.series)
-    dumped = chart.model_dump()
-    assert all(len(series["data"]) > 0 for series in dumped["series"])
+    assert len(chart.data) == len(expected_nm)
+    assert all(len(series.data) == len(chart.data) for series in chart.series)
+    assert [series.yKey for series in chart.series] == ["state_1", "full_spectrum"]
     assert all(
-        "frequency" in point and "intensity" in point
-        for series in dumped["series"]
-        for point in series["data"]
+        "frequency" in row and "state_1" in row and "full_spectrum" in row
+        for row in chart.data
     )
+    dumped = chart.model_dump()
+    assert len(dumped["data"]) == len(expected_nm)
+    assert all(len(series["data"]) == len(expected_nm) for series in dumped["series"])
 
     already_nm_child = ArtifactModel(name="state_2", path="none")
     already_nm_child.data["plot_data"] = [
@@ -202,8 +202,8 @@ def test_spectrum_x_to_nm_converts_ev_and_leaves_nm():
         [point["frequency"] for point in named_nm[0].data["plot_data"]],
         expected_nm,
     )
-    assert all(len(series.data) > 0 for series in nm_artifacts[-1].series)
-    assert [series.title for series in nm_artifacts[-1].series] == ["state_2", "full_spectrum"]
+    assert len(nm_artifacts[-1].data) == len(expected_nm)
+    assert [series.yKey for series in nm_artifacts[-1].series] == ["state_2", "full_spectrum"]
 
     with pytest.raises(ValueError, match="not unambiguously eV or nm"):
         spectrum_x_to_nm(np.array([10.0, 80.0]))
