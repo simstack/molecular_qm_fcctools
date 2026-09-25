@@ -27,7 +27,13 @@ from simstack.core.simstack_result import SimstackResult
 from simstack.models import ArtifactMapping, ArtifactModel, FloatData, Parameters, StringData, DataSetTupleSelection, \
     DataSetTuple, DataSetTupleSelectionField, DataSet, DataSetSelection
 from simstack.models.array_storage import ArrayStorage
-from simstack.models.charts_artifact import ChartArtifactModel, create_multi_series_line_chart
+from simstack.models.charts_artifact import (
+    AGChartAxisConfig,
+    AGChartTitleConfig,
+    AGLineSeriesConfig,
+    ChartArtifactModel,
+    create_multi_series_line_chart,
+)
 from scipy.interpolate import interp1d
 
 import logging
@@ -87,8 +93,6 @@ def vb_spectra_plots(argument: ArtifactArguments):
         artifact = spectrum_plot_artifact("full_spectrum", wavelengths, intensities)
 
         artifacts = []
-        combined_rows: dict[float, dict] = {}
-        y_keys = []
         seen_names = set()
         for child_artifact in argument.child_artifacts:
             logger.info(f"Artifact: task_id: {argument.task_id} Child artifact: {child_artifact.name}")
@@ -106,23 +110,31 @@ def vb_spectra_plots(argument: ArtifactArguments):
             artifacts.append(
                 spectrum_plot_artifact(child_artifact.name, child_wavelengths, child_intensities)
             )
-            y_keys.append(child_artifact.name)
-            for wavelength, intensity in zip(child_wavelengths, child_intensities):
-                x_val = float(wavelength)
-                combined_rows.setdefault(x_val, {"frequency": x_val})[child_artifact.name] = float(intensity)
 
         artifacts.append(artifact)
-        y_keys.append("full_spectrum")
-        for wavelength, intensity in zip(wavelengths, intensities):
-            x_val = float(wavelength)
-            combined_rows.setdefault(x_val, {"frequency": x_val})["full_spectrum"] = float(intensity)
-
-        chart_artifact = create_multi_series_line_chart(
-            data=[combined_rows[key] for key in sorted(combined_rows)],
-            x_key="frequency",
-            y_keys=y_keys,
-            title="All spectra",
+        series = []
+        for item in artifacts:
+            series_data = item.data["plot_data"]
+            logger.info(
+                f"Artifact: task_id: {argument.task_id} All spectra series {item.name} points={len(series_data)}"
+            )
+            series.append(
+                AGLineSeriesConfig(
+                    type="line",
+                    xKey="frequency",
+                    yKey="intensity",
+                    title=item.name,
+                    data=series_data,
+                )
+            )
+        chart_artifact = ChartArtifactModel(
             parent_id=argument.task_id,
+            title=AGChartTitleConfig(text="All spectra"),
+            series=series,
+            axes=[
+                AGChartAxisConfig(type="number", position="bottom", title="Wavelength (nm)"),
+                AGChartAxisConfig(type="number", position="left", title="Intensity"),
+            ],
         )
         artifacts.append(chart_artifact)
         return artifacts

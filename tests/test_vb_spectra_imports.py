@@ -174,7 +174,15 @@ def test_spectrum_x_to_nm_converts_ev_and_leaves_nm():
     chart = artifacts[-1]
     assert chart.series
     assert all(len(series.data) > 0 for series in chart.series)
-    assert [series.yKey for series in chart.series] == ["state_1", "full_spectrum"]
+    assert [series.title for series in chart.series] == ["state_1", "full_spectrum"]
+    assert all(series.yKey == "intensity" for series in chart.series)
+    dumped = chart.model_dump()
+    assert all(len(series["data"]) > 0 for series in dumped["series"])
+    assert all(
+        "frequency" in point and "intensity" in point
+        for series in dumped["series"]
+        for point in series["data"]
+    )
 
     already_nm_child = ArtifactModel(name="state_2", path="none")
     already_nm_child.data["plot_data"] = [
@@ -195,6 +203,7 @@ def test_spectrum_x_to_nm_converts_ev_and_leaves_nm():
         expected_nm,
     )
     assert all(len(series.data) > 0 for series in nm_artifacts[-1].series)
+    assert [series.title for series in nm_artifacts[-1].series] == ["state_2", "full_spectrum"]
 
     with pytest.raises(ValueError, match="not unambiguously eV or nm"):
         spectrum_x_to_nm(np.array([10.0, 80.0]))
