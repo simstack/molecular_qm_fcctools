@@ -5,6 +5,7 @@ import sys
 import types
 from typing import Any
 
+from matplotlib.pyplot import xlabel
 from numpy import ndarray
 from odmantic import ObjectId
 
@@ -13,6 +14,7 @@ from molecular_qm_util import compute_iupac_name, smiles_to_molecule
 from simstack.core.artifacts import register_artifact_mapping, ArtifactArguments
 from simstack.core.context import context
 
+from molecular_qm_fcctools import make_multi_line_chart
 from molecular_qm_fcctools.nodes.fc_classes import FC_ClassesInput
 from molecular_qm_fcctools.nodes.spectra_analysis import process_experimental_spectrum, spectrum_x_to_nm
 from molecular_qm_fcctools.nodes.vibrational_spectra import vb_spectra
@@ -106,6 +108,15 @@ def vb_spectra_plots(argument: ArtifactArguments):
             )
 
         artifacts.append(artifact)
+        chart_artifact = make_multi_line_chart(artifacts,
+                                               chart_title="All spectra",
+                                               x_axis_title="Wavelength (nm)",
+                                               y_axis_title="Intensity (arb. units)",
+                                               x_key="frequency",
+                                               y_key="intensity",
+                                               task_id=argument.task_id)
+
+        artifacts.append(chart_artifact)
         return artifacts
     except Exception as e:
         logger.exception(f"Error creating plot artifact: task_id: {argument.task_id} {str(e)}")

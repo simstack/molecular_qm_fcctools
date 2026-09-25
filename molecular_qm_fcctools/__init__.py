@@ -22,6 +22,8 @@ from molecular_qm_fcctools.nodes.vibrational_spectra import (
     vb_spectra,
 )
 
+from molecular_qm_fcctools.lib.plot_spectra import make_multi_line_chart
+
 __all__ = [
     "clean_spectra_dataset",
     "compute_spectra",
@@ -42,4 +44,6 @@ __all__ = [
     "reconvolute_td",
     "reconvolute_ti",
     "vb_spectra",
+    "make_multi_line_chart",
+
 ]

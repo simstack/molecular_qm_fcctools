@@ -1,3 +1,4 @@
+import logging
 from typing import List
 from simstack.models import ArtifactModel
 
@@ -28,6 +29,7 @@ from simstack.models.charts_artifact import (
 # main.esm.mjs:24AG Charts - Option `axes[1].max` cannot be set to `null`; expecting a number and the value to be greater than `min`, ignoring.
 # main.esm.mjs:24AG Charts - Unknown option `axes[1].gridStyle`, ignoring.
 
+logger = logging.getLogger(__name__)
 
 def make_multi_line_chart(artifact_list: List[ArtifactModel], **kwargs) -> ChartArtifactModel:
     """
@@ -44,6 +46,9 @@ def make_multi_line_chart(artifact_list: List[ArtifactModel], **kwargs) -> Chart
     y_axis_title = kwargs.get("y_axis_title", "Y")
     x_key = kwargs.get("x_key", None)
     y_key = kwargs.get("y_key", None)
+
+    logger.info(f"Creating multi-line chart with x_key: {x_key} and y_key: {y_key} task_id: {task_id}")
+
 
     if x_key is None or y_key is None:
         raise ValueError("x_key and y_key must be provided.")
@@ -80,6 +85,9 @@ def make_multi_line_chart(artifact_list: List[ArtifactModel], **kwargs) -> Chart
     y_max = float("-inf")
 
     for idx, artifact in enumerate(artifact_list):
+
+        logger.info(f"Creating multi-line chart with x_key: {x_key} and y_key: {y_key} task_id: {task_id}")
+
         plot_data = artifact.data.get("plot_data", [])
         if plot_data is None:
             continue
