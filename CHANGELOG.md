@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.6.25 (2026-09-25)
+
+### Bug Fixes
+
+- Enhance VB spectra data handling and test validations
+  ([`e99de06`](https://github.com/simstack/molecular_qm_fcctools/commit/e99de065012fd87f907ad6accf40bd94d8436515))
+
+
 ## v0.6.24 (2026-09-25)
 
 ### Bug Fixes
