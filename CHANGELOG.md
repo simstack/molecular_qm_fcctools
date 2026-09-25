@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.6.24 (2026-09-25)
+
+### Bug Fixes
+
+- Refine VB spectra chart data handling and update tests
+  ([`ddacaaf`](https://github.com/simstack/molecular_qm_fcctools/commit/ddacaaf52380c05174045681330f852f27c5963c))
+
+
 ## v0.6.23 (2026-09-25)
 
 
