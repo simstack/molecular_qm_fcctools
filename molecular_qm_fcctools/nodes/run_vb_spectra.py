@@ -13,7 +13,6 @@ from molecular_qm_util import compute_iupac_name, smiles_to_molecule
 from simstack.core.artifacts import register_artifact_mapping, ArtifactArguments
 from simstack.core.context import context
 
-from molecular_qm_fcctools.lib.plot_spectra import make_multi_line_chart
 from molecular_qm_fcctools.nodes.fc_classes import FC_ClassesInput
 from molecular_qm_fcctools.nodes.spectra_analysis import process_experimental_spectrum, spectrum_x_to_nm
 from molecular_qm_fcctools.nodes.vibrational_spectra import vb_spectra
@@ -88,6 +87,8 @@ def vb_spectra_plots(argument: ArtifactArguments):
         artifact = spectrum_plot_artifact("full_spectrum", wavelengths, intensities)
 
         artifacts = []
+        combined_rows: dict[float, dict] = {}
+        y_keys = []
         seen_names = set()
         for child_artifact in argument.child_artifacts:
             logger.info(f"Artifact: task_id: {argument.task_id} Child artifact: {child_artifact.name}")
@@ -105,16 +106,24 @@ def vb_spectra_plots(argument: ArtifactArguments):
             artifacts.append(
                 spectrum_plot_artifact(child_artifact.name, child_wavelengths, child_intensities)
             )
+            y_keys.append(child_artifact.name)
+            for wavelength, intensity in zip(child_wavelengths, child_intensities):
+                x_val = float(wavelength)
+                combined_rows.setdefault(x_val, {"frequency": x_val})[child_artifact.name] = float(intensity)
 
         artifacts.append(artifact)
-        chart_artifact = make_multi_line_chart(artifacts,
-                                               chart_title="All spectra",
-                                               x_axis_title="Wavelength (nm)",
-                                               y_axis_title="Intensity (arb. units)",
-                                               x_key="frequency",
-                                               y_key="intensity",
-                                               task_id=argument.task_id)
+        y_keys.append("full_spectrum")
+        for wavelength, intensity in zip(wavelengths, intensities):
+            x_val = float(wavelength)
+            combined_rows.setdefault(x_val, {"frequency": x_val})["full_spectrum"] = float(intensity)
 
+        chart_artifact = create_multi_series_line_chart(
+            data=[combined_rows[key] for key in sorted(combined_rows)],
+            x_key="frequency",
+            y_keys=y_keys,
+            title="All spectra",
+            parent_id=argument.task_id,
+        )
         artifacts.append(chart_artifact)
         return artifacts
     except Exception as e:

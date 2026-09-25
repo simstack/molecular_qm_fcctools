@@ -174,7 +174,7 @@ def test_spectrum_x_to_nm_converts_ev_and_leaves_nm():
     chart = artifacts[-1]
     assert chart.series
     assert all(len(series.data) > 0 for series in chart.series)
-    assert {series.yKey for series in chart.series} == {"state_1__0", "full_spectrum__1"}
+    assert [series.yKey for series in chart.series] == ["state_1", "full_spectrum"]
 
     already_nm_child = ArtifactModel(name="state_2", path="none")
     already_nm_child.data["plot_data"] = [
