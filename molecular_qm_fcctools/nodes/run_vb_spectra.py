@@ -14,7 +14,7 @@ from molecular_qm_util import compute_iupac_name, smiles_to_molecule
 from simstack.core.artifacts import register_artifact_mapping, ArtifactArguments
 from simstack.core.context import context
 
-from molecular_qm_fcctools import make_multi_line_chart
+from molecular_qm_fcctools.lib.plot_spectra import make_multi_line_chart
 from molecular_qm_fcctools.nodes.fc_classes import FC_ClassesInput
 from molecular_qm_fcctools.nodes.spectra_analysis import process_experimental_spectrum, spectrum_x_to_nm
 from molecular_qm_fcctools.nodes.vibrational_spectra import vb_spectra
