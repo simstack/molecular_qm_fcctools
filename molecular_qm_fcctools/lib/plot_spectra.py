@@ -76,7 +76,7 @@ def make_multi_line_chart(artifact_list: List[ArtifactModel], **kwargs) -> Chart
     colors = ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FECA57"]
 
     combined_rows: dict[float, dict] = {}
-    series_configs: list[AGLineSeriesConfig] = []
+    series_meta: list[tuple[str, str, str]] = []
 
     # Track ranges (only set min/max when we actually have values)
     x_min = float("inf")
@@ -85,8 +85,9 @@ def make_multi_line_chart(artifact_list: List[ArtifactModel], **kwargs) -> Chart
     y_max = float("-inf")
 
     for idx, artifact in enumerate(artifact_list):
-
-        logger.info(f"Creating multi-line chart with x_key: {x_key} and y_key: {y_key} task_id: {task_id}")
+        logger.info(
+            f"Creating multi-line chart with x_key: {x_key} and y_key: {y_key} task_id: {task_id}"
+        )
 
         plot_data = artifact.data.get("plot_data", [])
         if plot_data is None:
@@ -109,23 +110,24 @@ def make_multi_line_chart(artifact_list: List[ArtifactModel], **kwargs) -> Chart
             row = combined_rows.setdefault(x_val, {x_key: x_val})
             row[this_y_key] = y_val
 
-        series_configs.append(
-            AGLineSeriesConfig(
-                type="line",
-                xKey=x_key,
-                yKey=this_y_key,
-                title=getattr(artifact, "name", this_y_key),
-                data=[],  # prefer the chart-level `data` below; keep series lean
-                stroke=color,
-                strokeWidth=2,
-                strokeOpacity=1.0,
-                marker={"enabled": True, "size": 3, "fill": color},
-                tooltip={},  # prevents "tooltip is required" warnings in some front-ends
-            )
-        )
+        series_meta.append((this_y_key, color, getattr(artifact, "name", this_y_key)))
 
-    # Turn dict into sorted list by x
     combined_data = [combined_rows[k] for k in sorted(combined_rows.keys())]
+    series_configs = [
+        AGLineSeriesConfig(
+            type="line",
+            xKey=x_key,
+            yKey=this_y_key,
+            title=title,
+            data=combined_data,
+            stroke=color,
+            strokeWidth=2,
+            strokeOpacity=1.0,
+            marker={"enabled": True, "size": 3, "fill": color},
+            tooltip={},
+        )
+        for this_y_key, color, title in series_meta
+    ]
 
     axes = [
         AGChartAxisConfig(

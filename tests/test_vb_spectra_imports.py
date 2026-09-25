@@ -155,14 +155,15 @@ def test_spectrum_x_to_nm_converts_ev_and_leaves_nm():
     plot_argument = ArtifactArguments(result=SimpleNamespace(all_spectra=all_spectra))
     plot_argument.child_artifacts = [child]
     artifacts = rvs.vb_spectra_plots(plot_argument)
-    assert [item.name for item in artifacts] == ["state_1", "full_spectrum"]
-    full_spectrum = artifacts[-1]
+    named = [item for item in artifacts if getattr(item, "name", None)]
+    assert [item.name for item in named] == ["state_1", "full_spectrum"]
+    full_spectrum = named[-1]
     np.testing.assert_allclose(
         [point["frequency"] for point in full_spectrum.data["plot_data"]],
         expected_nm,
     )
     np.testing.assert_allclose(
-        [point["frequency"] for point in artifacts[0].data["plot_data"]],
+        [point["frequency"] for point in named[0].data["plot_data"]],
         expected_nm,
     )
     assert "data" in full_spectrum.model_fields_set
@@ -170,6 +171,10 @@ def test_spectrum_x_to_nm_converts_ev_and_leaves_nm():
         type(point["frequency"]) is float and type(point["intensity"]) is float
         for point in full_spectrum.data["plot_data"]
     )
+    chart = artifacts[-1]
+    assert chart.series
+    assert all(len(series.data) > 0 for series in chart.series)
+    assert {series.yKey for series in chart.series} == {"state_1__0", "full_spectrum__1"}
 
     already_nm_child = ArtifactModel(name="state_2", path="none")
     already_nm_child.data["plot_data"] = [
@@ -179,15 +184,17 @@ def test_spectrum_x_to_nm_converts_ev_and_leaves_nm():
     nm_argument = ArtifactArguments(result=SimpleNamespace(all_spectra=all_spectra))
     nm_argument.child_artifacts = [already_nm_child]
     nm_artifacts = rvs.vb_spectra_plots(nm_argument)
-    assert [item.name for item in nm_artifacts] == ["state_2", "full_spectrum"]
+    named_nm = [item for item in nm_artifacts if getattr(item, "name", None)]
+    assert [item.name for item in named_nm] == ["state_2", "full_spectrum"]
     np.testing.assert_allclose(
         [point["frequency"] for point in already_nm_child.data["plot_data"]],
         expected_nm,
     )
     np.testing.assert_allclose(
-        [point["frequency"] for point in nm_artifacts[0].data["plot_data"]],
+        [point["frequency"] for point in named_nm[0].data["plot_data"]],
         expected_nm,
     )
+    assert all(len(series.data) > 0 for series in nm_artifacts[-1].series)
 
     with pytest.raises(ValueError, match="not unambiguously eV or nm"):
         spectrum_x_to_nm(np.array([10.0, 80.0]))
