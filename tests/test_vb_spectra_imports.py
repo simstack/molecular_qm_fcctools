@@ -176,10 +176,33 @@ def test_spectrum_x_to_nm_converts_ev_and_leaves_nm():
     assert len(chart.data) == len(expected_nm)
     assert all(len(series.data) == len(chart.data) for series in chart.series)
     assert [series.yKey for series in chart.series] == ["state_1", "full_spectrum"]
+    assert [series.stroke for series in chart.series] == ["#0000FF", "#FF0000"]
     assert all(
         "frequency" in row and "state_1" in row and "full_spectrum" in row
         for row in chart.data
     )
+    np.testing.assert_allclose(
+        [row["frequency"] for row in chart.data],
+        np.sort(expected_nm),
+    )
+
+    shifted_child = ArtifactModel(name="state_shift", path="none")
+    shifted_x = energies_ev * 0.99
+    shifted_child.data["plot_data"] = [
+        {"frequency": float(energy), "intensity": 0.25}
+        for energy in shifted_x
+    ]
+    shift_argument = ArtifactArguments(result=SimpleNamespace(all_spectra=all_spectra))
+    shift_argument.child_artifacts = [shifted_child]
+    shift_artifacts = rvs.vb_spectra_plots(shift_argument)
+    shift_chart = shift_artifacts[-1]
+    np.testing.assert_allclose(
+        [row["frequency"] for row in shift_chart.data],
+        [row["frequency"] for row in chart.data],
+    )
+    assert all("state_shift" in row for row in shift_chart.data)
+
+    already_nm_child = ArtifactModel(name="state_2", path="none")
     dumped = chart.model_dump()
     assert len(dumped["data"]) == len(expected_nm)
     assert all(len(series["data"]) == len(expected_nm) for series in dumped["series"])
