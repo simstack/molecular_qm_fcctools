@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.6.18 (2026-09-25)
+
+### Bug Fixes
+
+- Use multi-line chart utility and integrate with VB spectra processing
+  ([`d730cde`](https://github.com/simstack/molecular_qm_fcctools/commit/d730cde5e08b2a07d8605a385a4f32da3833f126))
+
+
 ## v0.6.17 (2026-09-25)
 
 ### Bug Fixes
