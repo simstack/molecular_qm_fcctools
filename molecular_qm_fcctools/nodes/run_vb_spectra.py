@@ -96,7 +96,9 @@ def vb_spectra_plots(argument: ArtifactArguments):
             if child_artifact.name in seen_names:
                 continue
             seen_names.add(child_artifact.name)
+
             child_x = np.array([point["frequency"] for point in plot_data])
+            logger.info(f"Artifact: task_id: {argument.task_id} Child artifact range: {child_x[0]} {child_x[-1]}")
             child_intensities = np.array([point["intensity"] for point in plot_data])
             child_wavelengths = spectrum_x_to_nm(child_x)
             artifacts.append(
