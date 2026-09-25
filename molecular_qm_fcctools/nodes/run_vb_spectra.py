@@ -5,7 +5,6 @@ import sys
 import types
 from typing import Any
 
-from matplotlib.pyplot import xlabel
 from numpy import ndarray
 from odmantic import ObjectId
 
