@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.6.19 (2026-09-25)
+
+### Bug Fixes
+
+- Update import path for `make_multi_line_chart` in VB spectra processing
+  ([`2228f85`](https://github.com/simstack/molecular_qm_fcctools/commit/2228f854ef1de4384285b29f7d575533a3b697ee))
+
+
 ## v0.6.18 (2026-09-25)
 
 ### Bug Fixes
