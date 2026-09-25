@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.6.17 (2026-09-25)
+
+### Bug Fixes
+
+- Log child artifact range in VB spectra processing
+  ([`1e38c39`](https://github.com/simstack/molecular_qm_fcctools/commit/1e38c394cadbb49496a9f6f83509281525113c68))
+
+
 ## v0.6.16 (2026-09-24)
 
 ### Bug Fixes
