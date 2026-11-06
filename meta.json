@@ -1,0 +1,17 @@
+{
+  "title": "Molecular QM FCclasses and fcc_tools",
+  "workflow_environment": "SimStack",
+  "description": "SimStack nodes for FCclasses3 vibronic spectra and fcc_tools input generation and spectrum post-processing.",
+  "authors": [
+    "Wolfgang Wenzel",
+    "Phillip Dullinger"
+  ],
+  "release": "v0.6.26",
+  "keywords": [
+    "SimStack",
+    "molecular quantum mechanics",
+    "FCclasses3",
+    "fcc_tools",
+    "vibronic spectra"
+  ]
+}
