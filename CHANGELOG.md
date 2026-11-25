@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.6.27 (2026-11-25)
+
+### Bug Fixes
+
+- Support P3 spectrum windows and newer Apptainer packages
+  ([`f3b408e`](https://github.com/simstack/molecular_qm_fcctools/commit/f3b408edb6828d6a0b928f022582445f61c5de77))
+
+
 ## v0.6.25 (2026-09-25)
 
 ### Bug Fixes
