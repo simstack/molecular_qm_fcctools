@@ -316,7 +316,7 @@ async def vb_spectra(qm_input: QMInput, excited_state_functional_input: Function
         excited_states_table = excited_state_gaussian_result.excited_states
         excited_states_energy = []
         states_to_calculate = 0
-        max_exp = fc_classes_input.spcmax
+        max_exp = spc_high.value if protocol_name.value == "P3" else fc_classes_input.spcmax
         node_runner.log(f"Bound on excited states: {max_exp}")
         for index, row in enumerate(excited_states_table.row):
             node_runner.log(f"      excited state {index}: {row['energy_ev']} eV {row['energy_nm']} nm")
@@ -348,10 +348,14 @@ async def vb_spectra(qm_input: QMInput, excited_state_functional_input: Function
             input_list.file_list.append(excited_state_fcc_file)
             input_list.file_list.append(excited_state_dipole_file)
 
-            if protocol_name.value == "P1":
+            if protocol_name.value in ("P1", "P3"):
                 fc_classes_copy = FC_ClassesInput(**fc_classes_input.model_dump(exclude={"id"}))
-                fc_classes_copy.spcmin = max(excited_states_energy[focus_state - 1] - spc_low.value, 0.0)
-                fc_classes_copy.spcmax = excited_states_energy[focus_state - 1] + spc_high.value
+                if protocol_name.value == "P1":
+                    fc_classes_copy.spcmin = max(excited_states_energy[focus_state - 1] - spc_low.value, 0.0)
+                    fc_classes_copy.spcmax = excited_states_energy[focus_state - 1] + spc_high.value
+                else:
+                    fc_classes_copy.spcmin = spc_low.value
+                    fc_classes_copy.spcmax = spc_high.value
                 node_runner.info(f"spcmin: {fc_classes_copy.spcmin} spcmax: {fc_classes_copy.spcmax}")
                 fc_classes_copy.file_list_io = input_list
                 fc_classes_copy.state_number = focus_state

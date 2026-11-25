@@ -73,6 +73,13 @@ def test_vb_spectra_p2_uses_molecule_formula_for_iterative_refinement_name():
     assert "qm_input.molecule.formula" in src
 
 
+def test_vb_spectra_p3_uses_fixed_spectrum_window():
+    src = getsource(vs.vb_spectra)
+    assert 'protocol_name.value == "P3"' in src
+    assert "fc_classes_copy.spcmin = spc_low.value" in src
+    assert "fc_classes_copy.spcmax = spc_high.value" in src
+
+
 def test_iterative_refinement_persists_converged_as_boolean_data():
     """Raw bools and nested SimstackResult are dropped; a lone chart then unwraps."""
     src = getsource(vs.iterative_refinement)
